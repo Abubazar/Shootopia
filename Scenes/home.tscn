@@ -1,0 +1,235 @@
+[gd_scene load_steps=6 format=3 uid="uid://ch4ltjwsrn4hk"]
+
+[ext_resource type="Script" uid="uid://b4x7av6vunltk" path="res://Scripts/home.gd" id="1_12ycv"]
+[ext_resource type="Texture2D" uid="uid://jg2fl65upej2" path="res://image assets/background.png" id="1_ibywg"]
+[ext_resource type="FontFile" uid="uid://c8rg5nu3njrng" path="res://image assets/MotionControl-Bold.otf" id="2_12ycv"]
+[ext_resource type="Theme" uid="uid://cbm1tejt81duc" path="res://Scripts/game theme.tres" id="3_llnbm"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_fhpuh"]
+font = ExtResource("2_12ycv")
+font_size = 60
+
+[node name="CanvasLayer" type="CanvasLayer"]
+script = ExtResource("1_12ycv")
+
+[node name="home" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureRect" type="TextureRect" parent="home"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -1033.5
+offset_top = -381.5
+offset_right = 1033.5
+offset_bottom = 381.5
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_ibywg")
+expand_mode = 2
+stretch_mode = 4
+
+[node name="Panel" type="Panel" parent="home"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="main" type="CenterContainer" parent="home"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="home/main"]
+layout_mode = 2
+theme_override_constants/separation = 35
+
+[node name="Label" type="Label" parent="home/main/VBoxContainer"]
+layout_mode = 2
+text = "Welcome To Shootopia!"
+label_settings = SubResource("LabelSettings_fhpuh")
+
+[node name="play btn" type="Button" parent="home/main/VBoxContainer"]
+layout_mode = 2
+theme = ExtResource("3_llnbm")
+text = "Play"
+
+[node name="settings btn" type="Button" parent="home/main/VBoxContainer"]
+layout_mode = 2
+theme = ExtResource("3_llnbm")
+text = "Settings"
+
+[node name="exit btn" type="Button" parent="home/main/VBoxContainer"]
+layout_mode = 2
+theme = ExtResource("3_llnbm")
+text = "Exit Game"
+
+[node name="Control" type="Control" parent="home"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="play game" type="MarginContainer" parent="home/Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 60
+theme_override_constants/margin_top = 30
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 30
+
+[node name="GridContainer" type="HBoxContainer" parent="home/Control/play game"]
+layout_mode = 2
+theme_override_constants/separation = 30
+
+[node name="VBoxContainer" type="VBoxContainer" parent="home/Control/play game/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_constants/separation = 50
+
+[node name="host btn" type="Button" parent="home/Control/play game/GridContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme = ExtResource("3_llnbm")
+theme_override_font_sizes/font_size = 25
+text = "Host a game"
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="home/Control/play game/GridContainer"]
+layout_mode = 2
+
+[node name="Control" type="Control" parent="home/Control/play game/GridContainer/VBoxContainer2"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="home/Control/play game/GridContainer/VBoxContainer2/Control"]
+layout_mode = 1
+offset_left = 100.0
+offset_right = 449.0
+offset_bottom = 34.0
+theme_override_constants/separation = 20
+
+[node name="Label" type="Label" parent="home/Control/play game/GridContainer/VBoxContainer2/Control/HBoxContainer"]
+layout_mode = 2
+theme = ExtResource("3_llnbm")
+theme_override_font_sizes/font_size = 30
+text = "     Available Lobbies"
+
+[node name="join btn" type="Button" parent="home/Control/play game/GridContainer/VBoxContainer2/Control/HBoxContainer"]
+layout_mode = 2
+theme = ExtResource("3_llnbm")
+theme_override_font_sizes/font_size = 25
+disabled = true
+text = "Join Game"
+
+[node name="lobbies" type="ItemList" parent="home/Control/play game/GridContainer/VBoxContainer2/Control"]
+layout_mode = 1
+offset_top = 61.0
+offset_right = 838.0
+offset_bottom = 523.0
+theme = ExtResource("3_llnbm")
+item_count = 2
+item_0/text = "abubakar lobby"
+item_1/text = "another dudes game"
+
+[node name="back btn" type="Button" parent="home/Control"]
+layout_mode = 1
+offset_left = 38.0
+offset_top = 32.0
+offset_right = 136.0
+offset_bottom = 66.0
+theme = ExtResource("3_llnbm")
+theme_override_font_sizes/font_size = 25
+text = "Go Back"
+
+[node name="MarginContainer" type="MarginContainer" parent="home"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 50
+theme_override_constants/margin_top = 50
+theme_override_constants/margin_right = 50
+theme_override_constants/margin_bottom = 50
+
+[node name="ScrollContainer" type="ScrollContainer" parent="home/MarginContainer"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="home/MarginContainer/ScrollContainer"]
+layout_mode = 2
+theme_override_constants/separation = 35
+
+[node name="HBoxContainer" type="HBoxContainer" parent="home/MarginContainer/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 25
+
+[node name="Label" type="Label" parent="home/MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+theme = ExtResource("3_llnbm")
+text = "Username"
+
+[node name="username" type="LineEdit" parent="home/MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+theme = ExtResource("3_llnbm")
+placeholder_text = "CoolGamer67"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="home/MarginContainer/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 25
+
+[node name="Label" type="Label" parent="home/MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer2"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+theme = ExtResource("3_llnbm")
+text = "Mouse Sensitivity"
+
+[node name="sensitivity" type="HSlider" parent="home/MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer2"]
+custom_minimum_size = Vector2(200, 50)
+layout_mode = 2
+theme = ExtResource("3_llnbm")
+min_value = 0.01
+max_value = 0.1
+value = 0.01
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="home/MarginContainer/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 25
+
+[node name="Label" type="Label" parent="home/MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer3"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+theme = ExtResource("3_llnbm")
+text = "Sound Effects"
+
+[node name="sound" type="CheckButton" parent="home/MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+theme = ExtResource("3_llnbm")
+
+[node name="go back" type="Button" parent="home/MarginContainer/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+theme = ExtResource("3_llnbm")
+text = "Go Back"

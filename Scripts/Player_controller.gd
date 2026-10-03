@@ -252,7 +252,7 @@ func update_animation_tree():
 
 
 # CAMERA
-const SENSITIVITY := 0.016
+var SENSITIVITY := 0.016
 
 const BOB_FREQ := 3.0
 const BOB_AMP := 0.04
