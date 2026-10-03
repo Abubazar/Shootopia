@@ -15,6 +15,10 @@ run/main_scene="res://Scenes/world.tscn"
 config/features=PackedStringArray("4.4", "GL Compatibility")
 config/icon="res://icon.svg"
 
+[autoload]
+
+Glob="*res://Scripts/Gobal_Vars.gd"
+
 [display]
 
 window/stretch/mode="viewport"
