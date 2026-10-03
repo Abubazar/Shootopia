@@ -1,0 +1,83 @@
+[gd_resource type="AnimationNodeBlendTree" load_steps=18 format=3 uid="uid://b67yds2ywngpy"]
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_j3d08"]
+animation = &"fAnims/idle"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_a3xrk"]
+animation = &"fAnims/jump"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_3irhd"]
+animation = &"fAnims/reload"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_oi50c"]
+animation = &"fAnims/run"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_cwlv7"]
+animation = &"fAnims/runback"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_d85x5"]
+animation = &"fAnims/runleft"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_u4wuf"]
+animation = &"fAnims/runright"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_63o1t"]
+animation = &"fAnims/shoot"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_ktlp4"]
+animation = &"fAnims/slide"
+
+[sub_resource type="AnimationNodeBlend2" id="AnimationNodeBlend2_qfyx4"]
+
+[sub_resource type="AnimationNodeBlend2" id="AnimationNodeBlend2_6616h"]
+
+[sub_resource type="AnimationNodeBlend2" id="AnimationNodeBlend2_6kg3a"]
+
+[sub_resource type="AnimationNodeBlend2" id="AnimationNodeBlend2_2nltq"]
+
+[sub_resource type="AnimationNodeBlend2" id="AnimationNodeBlend2_m56xd"]
+
+[sub_resource type="AnimationNodeBlend2" id="AnimationNodeBlend2_0gn6i"]
+
+[sub_resource type="AnimationNodeBlend2" id="AnimationNodeBlend2_8clmy"]
+
+[sub_resource type="AnimationNodeBlend2" id="AnimationNodeBlend2_732nk"]
+
+[resource]
+graph_offset = Vector2(-1224.07, 43.1128)
+nodes/aidle/node = SubResource("AnimationNodeAnimation_j3d08")
+nodes/aidle/position = Vector2(-1040, 180)
+nodes/ajump/node = SubResource("AnimationNodeAnimation_a3xrk")
+nodes/ajump/position = Vector2(-720, 380)
+nodes/areload/node = SubResource("AnimationNodeAnimation_3irhd")
+nodes/areload/position = Vector2(-318.645, 393.472)
+nodes/arun/node = SubResource("AnimationNodeAnimation_oi50c")
+nodes/arun/position = Vector2(-32.2426, 403.18)
+nodes/arunback/node = SubResource("AnimationNodeAnimation_cwlv7")
+nodes/arunback/position = Vector2(333.964, 440.027)
+nodes/arunleft/node = SubResource("AnimationNodeAnimation_d85x5")
+nodes/arunleft/position = Vector2(657.795, 402.662)
+nodes/arunright/node = SubResource("AnimationNodeAnimation_u4wuf")
+nodes/arunright/position = Vector2(1010.99, 420.819)
+nodes/ashoot/node = SubResource("AnimationNodeAnimation_63o1t")
+nodes/ashoot/position = Vector2(1405.44, 443.351)
+nodes/aslide/node = SubResource("AnimationNodeAnimation_ktlp4")
+nodes/aslide/position = Vector2(1793.29, 462.89)
+nodes/jump/node = SubResource("AnimationNodeBlend2_qfyx4")
+nodes/jump/position = Vector2(-493.529, 156.137)
+nodes/output/position = Vector2(2260, 160)
+nodes/reload/node = SubResource("AnimationNodeBlend2_6616h")
+nodes/reload/position = Vector2(-144.961, 113.237)
+nodes/run/node = SubResource("AnimationNodeBlend2_6kg3a")
+nodes/run/position = Vector2(214.332, 169.544)
+nodes/runback/node = SubResource("AnimationNodeBlend2_2nltq")
+nodes/runback/position = Vector2(500, 140)
+nodes/runleft/node = SubResource("AnimationNodeBlend2_m56xd")
+nodes/runleft/position = Vector2(873.451, 121.463)
+nodes/runright/node = SubResource("AnimationNodeBlend2_0gn6i")
+nodes/runright/position = Vector2(1255.17, 167.799)
+nodes/shoot/node = SubResource("AnimationNodeBlend2_8clmy")
+nodes/shoot/position = Vector2(1639.1, 170.006)
+nodes/slide/node = SubResource("AnimationNodeBlend2_732nk")
+nodes/slide/position = Vector2(2023.02, 219.481)
+node_connections = [&"jump", 0, &"aidle", &"jump", 1, &"ajump", &"output", 0, &"slide", &"reload", 0, &"jump", &"reload", 1, &"areload", &"run", 0, &"reload", &"run", 1, &"arun", &"runback", 0, &"run", &"runback", 1, &"arunback", &"runleft", 0, &"runback", &"runleft", 1, &"arunleft", &"runright", 0, &"runleft", &"runright", 1, &"arunright", &"shoot", 0, &"runright", &"shoot", 1, &"ashoot", &"slide", 0, &"shoot", &"slide", 1, &"aslide"]

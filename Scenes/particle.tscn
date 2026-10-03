@@ -1,0 +1,41 @@
+[gd_scene load_steps=8 format=3 uid="uid://dqoxcm4gaqhfy"]
+
+[ext_resource type="Script" uid="uid://bfijjoyyuxdsr" path="res://Scripts/particle.gd" id="1_xhwoe"]
+
+[sub_resource type="Curve" id="Curve_2h5vk"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_xhwoe"]
+curve = SubResource("Curve_2h5vk")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_u2rni"]
+initial_velocity_min = 1.0
+initial_velocity_max = 2.0
+gravity = Vector3(0, 0, 0)
+scale_min = 0.03
+scale_max = 0.06
+scale_curve = SubResource("CurveTexture_xhwoe")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xhwoe"]
+albedo_color = Color(0.2484, 0.2484, 0.2484, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_8weg4"]
+material = SubResource("StandardMaterial3D_xhwoe")
+
+[sub_resource type="Skin" id="Skin_w338e"]
+
+[node name="Node3D" type="Node3D"]
+script = ExtResource("1_xhwoe")
+
+[node name="parti" type="GPUParticles3D" parent="."]
+transform = Transform3D(-1.07093e-08, 0, 0.245, 0, 0.245, 0, -0.245, 0, -1.07093e-08, 0, 0, 0)
+amount = 15
+lifetime = 2.0
+speed_scale = 11.67
+explosiveness = 0.6
+process_material = SubResource("ParticleProcessMaterial_u2rni")
+draw_pass_1 = SubResource("BoxMesh_8weg4")
+draw_skin = SubResource("Skin_w338e")
+
+[connection signal="finished" from="parti" to="." method="_on_parti_finished"]
