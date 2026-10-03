@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=18 format=3 uid="uid://cbm1tejt81duc"]
+[gd_resource type="Theme" load_steps=17 format=3 uid="uid://cbm1tejt81duc"]
 
 [ext_resource type="FontFile" uid="uid://c8rg5nu3njrng" path="res://image assets/MotionControl-Bold.otf" id="1_xrkev"]
 
@@ -53,9 +53,6 @@ corner_radius_bottom_left = 5
 corner_detail = 5
 expand_margin_bottom = 10.0
 shadow_color = Color(0, 0, 0, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_guyud"]
-bg_color = Color(0.6, 0.6, 0.6, 0)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_w7rsi"]
 bg_color = Color(0.233299, 0.655248, 0.798002, 1)
@@ -197,8 +194,6 @@ Button/styles/focus = SubResource("StyleBoxFlat_klkr6")
 Button/styles/hover = SubResource("StyleBoxFlat_u5pf7")
 Button/styles/normal = SubResource("StyleBoxFlat_u5pf7")
 Button/styles/pressed = SubResource("StyleBoxFlat_ijnoe")
-CheckButton/styles/normal = SubResource("StyleBoxFlat_guyud")
-CheckButton/styles/pressed = SubResource("StyleBoxFlat_guyud")
 FlatButton/fonts/font = ExtResource("1_xrkev")
 FlatButton/styles/disabled = SubResource("StyleBoxFlat_w7rsi")
 ItemList/colors/font_color = Color(1, 1, 1, 1)
@@ -223,9 +218,8 @@ ItemList/styles/hovered_selected_focus = SubResource("StyleBoxFlat_bp3nc")
 ItemList/styles/panel = SubResource("StyleBoxFlat_6tat2")
 ItemList/styles/selected = SubResource("StyleBoxFlat_32dra")
 ItemList/styles/selected_focus = SubResource("StyleBoxFlat_kixkc")
-Label/font_sizes/font_size = 25
+Label/font_sizes/font_size = 20
 Label/fonts/font = ExtResource("1_xrkev")
-LineEdit/font_sizes/font_size = 25
 LineEdit/fonts/font = ExtResource("1_xrkev")
 Panel/styles/panel = SubResource("StyleBoxFlat_vbsth")
 ProgressBar/font_sizes/font_size = 25

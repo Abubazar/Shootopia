@@ -58,7 +58,7 @@ filters = ["", "Armature_001", "Armature_001/Skeleton3D:mixamorig_Head", "Armatu
 [sub_resource type="AnimationNodeBlend2" id="AnimationNodeBlend2_lw0lx"]
 
 [resource]
-graph_offset = Vector2(765.172, 170.46)
+graph_offset = Vector2(-189.954, 21.5031)
 nodes/Animation/node = SubResource("AnimationNodeAnimation_j68rc")
 nodes/Animation/position = Vector2(-600, 260)
 "nodes/Animation 10/node" = SubResource("AnimationNodeAnimation_7pgi3")
