@@ -8,8 +8,8 @@ func _ready() -> void:
 
 @onready var player: CharacterBody3D = $"../../../../.."
 
-func gotHit(name,damage):
-	player.gotHit("headshot",damage)
+func gotHit(area,damage,player_name):
+	player.gotHit("headshot",damage,player_name)
 	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:

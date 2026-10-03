@@ -13,8 +13,10 @@ const GRAVITY := Vector3(0, -20, 0)
 @onready var camera = $spine/head/Camera3D
 @onready var spine3d = $spine
 @onready var rayCast = $spine/RayCast3D
-@onready var healthBar = $spine/head/Camera3D/CanvasLayer/health
+@onready var healthBar = $spine/head/Camera3D/CanvasLayer/MarginContainer/ProgressBar
 @onready var weapon_map = $spine/head/Camera3D/CanvasLayer/Control/PanelContainer/MarginContainer/weaponMap
+@onready var killCounter: Label = $"spine/head/Camera3D/CanvasLayer/kills label"
+@onready var kill_status: ItemList = $"spine/head/Camera3D/CanvasLayer/kill status"
 
 
 @onready var particle = preload("res://Scenes/particle.tscn")
@@ -32,6 +34,7 @@ var waitingRespawn = false
 var reloading = false
 var changing = false
 var weaponToChange = null
+var killCount = 0
 
 #players
 @export_enum(
@@ -154,7 +157,6 @@ var shootCooldown = 0
 func shootSystem(delta):
 	if isShooting:
 		if shootCooldown >= weaponsInventory[currentWeapon]["cooldown"] && weaponsInventory[currentWeapon]['magazine'] > 0:
-			animTree.set("parameters/shoot/request",AnimationNodeOneShot.ONE_SHOT_REQUEST_ABORT)
 			animTree.set("parameters/shoot/request",AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 			weaponsInventory[currentWeapon]["magazine"]-=1
 			shootCooldown = 0
@@ -168,28 +170,33 @@ func shootSystem(delta):
 				parti.global_position = rayCast.get_collision_point()
 				var normal = rayCast.get_collision_normal()
 				parti.look_at(parti.global_position + normal, Vector3.UP)
-				print(hit.collision_layer)
 				if hit.collision_layer == 2 or hit.name == "headArea":
 					if hit.health >0:
-						hit.gotHit("hit",weaponsInventory[currentWeapon]['damage'])
+						hit.gotHit("body",weaponsInventory[currentWeapon]['damage'],name)
 						parti.set_color(Color("ff0000"))
-						#gotHit('hit',20)
+						gotHit('body',10,name)
 				else:
 					parti.set_color(Color("3f3f3f"))
 	shootCooldown+=delta
 
-func gotHit(name,damage):
-	if name=="headshot":
+func gotHit(area,damage,player_name):
+	if area=="headshot":
 		health -=damage*2
 	else:
 		health-=damage
 	if health <=0:
 		ragdollSkeleton.physical_bones_start_simulation()
 		collision_layer = 4
+		if player_name == name:
+			killCount +=1
+			kill_status.add_kill(name+" Killed "+"mortyyy")
+			killCounter.text = "Kills: " + str(killCount)
+			print(killCount)
 		if not waitingRespawn:
 			$Timer.start()
 	$characters/Armature_001/Skeleton3D/headCollision/headArea.health = health
-	healthBar.size.x = health*4
+	var tween = create_tween()
+	tween.tween_property(healthBar,"value",health,0.3)
 # ANIMATION
 enum {
 	IDLE,
@@ -270,7 +277,6 @@ func playerMovement(delta):
 	if not mainPlayer:
 		return
 	
-	var tween = create_tween()
 	if Input.is_action_just_pressed("gun1") and currentWeapon != "Pistol" and not reloading and not changing:
 		weaponToChange = "Pistol"
 		animTree.set("parameters/change/request",AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
@@ -369,9 +375,11 @@ func playerMovement(delta):
 		curAnim = JUMP
 	# Shoot
 	if Input.is_action_just_pressed("click") and not reloading:
+		var tween = create_tween()
 		tween.tween_property(camera,"fov",65,0.02)
 		isShooting = true
 	if Input.is_action_just_released("click"):
+		var tween = create_tween()
 		tween.tween_property(camera,"fov",75,0.02)
 		isShooting = false
 
