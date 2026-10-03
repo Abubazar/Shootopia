@@ -1,11 +1,11 @@
 extends CharacterBody3D
 
-
+func _enter_tree() -> void:
+	set_multiplayer_authority(id_val)
 
 # MOVEMENT
 
 var SPEED := 8.0
-var cameraZoom = 1
 const JUMP_VELOCITY := 8.5
 const GRAVITY := Vector3(0, -20, 0)
 
@@ -19,12 +19,14 @@ const GRAVITY := Vector3(0, -20, 0)
 @onready var kill_status: ItemList = $"spine/head/Camera3D/CanvasLayer/kill status"
 
 
+@export var id_val:int
+
+
 @onready var particle = preload("res://Scenes/particle.tscn")
 
 
 # PLAYER
 
-@export var mainPlayer = false
 @onready var model = $characters
 var playerName = "Player"
 @onready var playerLabel: Label3D = $PlayerName
@@ -35,6 +37,7 @@ var reloading = false
 var changing = false
 var weaponToChange = null
 var killCount = 0
+var trappedMouse = true
 
 #players
 @export_enum(
@@ -62,7 +65,7 @@ func setup_character():
 	for character in skeleton.get_children():
 		character.visible = character.name == character_type
 
-		if character.name == character_type and mainPlayer:
+		if character.name == character_type:
 			character.get_node("body").visible = false
 			playerLabel.visible = false
 
@@ -186,7 +189,7 @@ func gotHit(area,damage,player_name):
 		health-=damage
 	if health <=0:
 		ragdollSkeleton.physical_bones_start_simulation()
-		collision_layer = 4
+		collision_layer = 14
 		if player_name == name:
 			killCount +=1
 			kill_status.add_kill(name+" Killed "+"mortyyy")
@@ -261,9 +264,9 @@ var t_bob := 0.0
 
 
 func _unhandled_input(event):
-	if not mainPlayer:
+	if not is_multiplayer_authority():
 		return
-	if event is InputEventMouseMotion:
+	if event is InputEventMouseMotion and trappedMouse:
 		rotate_y(-event.relative.x * SENSITIVITY)
 
 		spine3d.rotate_x(-event.relative.y * SENSITIVITY)
@@ -274,7 +277,7 @@ func _unhandled_input(event):
 		)
 
 func playerMovement(delta):
-	if not mainPlayer:
+	if not is_multiplayer_authority():
 		return
 	
 	if Input.is_action_just_pressed("gun1") and currentWeapon != "Pistol" and not reloading and not changing:
@@ -346,7 +349,6 @@ func playerMovement(delta):
 				if Input.is_action_pressed("shift"):
 					curAnim = SPRINT
 					SPEED = 11
-					cameraZoom = 1.4
 		else:
 			velocity.x = lerp(
 				velocity.x,
@@ -382,6 +384,9 @@ func playerMovement(delta):
 		var tween = create_tween()
 		tween.tween_property(camera,"fov",75,0.02)
 		isShooting = false
+		
+	if Input.is_action_just_pressed("tab"):
+		trappedMouse = not trappedMouse
 
 # READY
 func _ready():

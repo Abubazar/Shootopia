@@ -1,7 +1,6 @@
-[gd_scene load_steps=7 format=3 uid="uid://c2w074dogbaxm"]
+[gd_scene load_steps=6 format=3 uid="uid://c2w074dogbaxm"]
 
 [ext_resource type="Script" uid="uid://dkxlyf73y2o4o" path="res://Scripts/world.gd" id="1_5a7ea"]
-[ext_resource type="PackedScene" uid="uid://caaywv6k1uc12" path="res://Scenes/player.tscn" id="2_8j60k"]
 [ext_resource type="PackedScene" uid="uid://c6oxhb850h8aq" path="res://Maps/map1.tscn" id="3_fo5ed"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_gv5m4"]
@@ -22,17 +21,8 @@ script = ExtResource("1_5a7ea")
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_fj7yv")
 
-[node name="Player" parent="." instance=ExtResource("2_8j60k")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.56063, 0)
-wall_min_slide_angle = 0.785398
-character_type = "Adventuress"
-
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.824432, 0.56596, 0, -0.56596, 0.824432, 0, 13.975, 18.8678)
-
-[node name="Player2" parent="." instance=ExtResource("2_8j60k")]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 1.52194, -2.53595)
-character_type = "Astra"
 
 [node name="map1" parent="." instance=ExtResource("3_fo5ed")]
 transform = Transform3D(3.325, 0, 0, 0, 3.325, 0, 0, 0, 3.325, 0, -8.89327, 0)

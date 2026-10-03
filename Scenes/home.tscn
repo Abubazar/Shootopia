@@ -1,9 +1,14 @@
-[gd_scene load_steps=97 format=4 uid="uid://ch4ltjwsrn4hk"]
+[gd_scene load_steps=102 format=4 uid="uid://ch4ltjwsrn4hk"]
 
 [ext_resource type="Script" uid="uid://b4x7av6vunltk" path="res://Scripts/home.gd" id="1_12ycv"]
 [ext_resource type="Texture2D" uid="uid://jg2fl65upej2" path="res://image assets/background.png" id="1_ibywg"]
+[ext_resource type="Script" uid="uid://t2pp5x204yxi" path="res://Scripts/entire.gd" id="1_llnbm"]
 [ext_resource type="FontFile" uid="uid://c8rg5nu3njrng" path="res://image assets/MotionControl-Bold.otf" id="2_12ycv"]
 [ext_resource type="Theme" uid="uid://cbm1tejt81duc" path="res://Scripts/game theme.tres" id="3_llnbm"]
+[ext_resource type="Script" uid="uid://6w65ickay0u0" path="res://Scripts/network_manager.gd" id="6_cykap"]
+[ext_resource type="PackedScene" uid="uid://c2w074dogbaxm" path="res://Scenes/world.tscn" id="7_nw1ns"]
+[ext_resource type="Script" uid="uid://0dcdtmg3twsv" path="res://Scripts/multiplayer_spawner.gd" id="8_8riyq"]
+[ext_resource type="PackedScene" uid="uid://caaywv6k1uc12" path="res://Scenes/player.tscn" id="9_gyiet"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_fhpuh"]
 font = ExtResource("2_12ycv")
@@ -5967,10 +5972,16 @@ _data = {
 &"idle": SubResource("Animation_12ycv")
 }
 
-[node name="CanvasLayer" type="CanvasLayer"]
+[node name="homeWorld" type="Node3D"]
+script = ExtResource("1_llnbm")
+
+[node name="Network_manager" type="Node" parent="."]
+script = ExtResource("6_cykap")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
 script = ExtResource("1_12ycv")
 
-[node name="home" type="Control" parent="."]
+[node name="home" type="Control" parent="CanvasLayer"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -5978,7 +5989,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="TextureRect" type="TextureRect" parent="home"]
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer/home"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -5995,7 +6006,7 @@ texture = ExtResource("1_ibywg")
 expand_mode = 2
 stretch_mode = 4
 
-[node name="Panel" type="Panel" parent="home"]
+[node name="Panel" type="Panel" parent="CanvasLayer/home"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -6003,7 +6014,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="main" type="CenterContainer" parent="home"]
+[node name="main" type="CenterContainer" parent="CanvasLayer/home"]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -6012,36 +6023,36 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="home/main"]
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/home/main"]
 layout_mode = 2
 theme_override_constants/separation = 35
 
-[node name="Label" type="Label" parent="home/main/VBoxContainer"]
+[node name="Label" type="Label" parent="CanvasLayer/home/main/VBoxContainer"]
 layout_mode = 2
 text = "Welcome To Shootopia!"
 label_settings = SubResource("LabelSettings_fhpuh")
 
-[node name="play btn" type="Button" parent="home/main/VBoxContainer"]
+[node name="play btn" type="Button" parent="CanvasLayer/home/main/VBoxContainer"]
 layout_mode = 2
 theme = ExtResource("3_llnbm")
 text = "Play"
 
-[node name="select btn" type="Button" parent="home/main/VBoxContainer"]
+[node name="select btn" type="Button" parent="CanvasLayer/home/main/VBoxContainer"]
 layout_mode = 2
 theme = ExtResource("3_llnbm")
 text = "Select Character"
 
-[node name="settings btn" type="Button" parent="home/main/VBoxContainer"]
+[node name="settings btn" type="Button" parent="CanvasLayer/home/main/VBoxContainer"]
 layout_mode = 2
 theme = ExtResource("3_llnbm")
 text = "Settings"
 
-[node name="exit btn" type="Button" parent="home/main/VBoxContainer"]
+[node name="exit btn" type="Button" parent="CanvasLayer/home/main/VBoxContainer"]
 layout_mode = 2
 theme = ExtResource("3_llnbm")
 text = "Exit Game"
 
-[node name="lobby" type="Control" parent="home"]
+[node name="lobby" type="Control" parent="CanvasLayer/home"]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -6050,7 +6061,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="play game" type="MarginContainer" parent="home/lobby"]
+[node name="play game" type="MarginContainer" parent="CanvasLayer/home/lobby"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -6062,50 +6073,50 @@ theme_override_constants/margin_top = 30
 theme_override_constants/margin_right = 30
 theme_override_constants/margin_bottom = 30
 
-[node name="GridContainer" type="HBoxContainer" parent="home/lobby/play game"]
+[node name="GridContainer" type="HBoxContainer" parent="CanvasLayer/home/lobby/play game"]
 layout_mode = 2
 theme_override_constants/separation = 30
 
-[node name="VBoxContainer" type="VBoxContainer" parent="home/lobby/play game/GridContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/home/lobby/play game/GridContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 theme_override_constants/separation = 50
 
-[node name="host btn" type="Button" parent="home/lobby/play game/GridContainer/VBoxContainer"]
+[node name="host btn" type="Button" parent="CanvasLayer/home/lobby/play game/GridContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
 theme = ExtResource("3_llnbm")
 theme_override_font_sizes/font_size = 25
 text = "Host a game"
 
-[node name="VBoxContainer2" type="VBoxContainer" parent="home/lobby/play game/GridContainer"]
+[node name="VBoxContainer2" type="VBoxContainer" parent="CanvasLayer/home/lobby/play game/GridContainer"]
 layout_mode = 2
 
-[node name="Control" type="Control" parent="home/lobby/play game/GridContainer/VBoxContainer2"]
+[node name="Control" type="Control" parent="CanvasLayer/home/lobby/play game/GridContainer/VBoxContainer2"]
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="home/lobby/play game/GridContainer/VBoxContainer2/Control"]
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/home/lobby/play game/GridContainer/VBoxContainer2/Control"]
 layout_mode = 1
 offset_left = 100.0
 offset_right = 449.0
 offset_bottom = 34.0
 theme_override_constants/separation = 20
 
-[node name="Label" type="Label" parent="home/lobby/play game/GridContainer/VBoxContainer2/Control/HBoxContainer"]
+[node name="Label" type="Label" parent="CanvasLayer/home/lobby/play game/GridContainer/VBoxContainer2/Control/HBoxContainer"]
 layout_mode = 2
 theme = ExtResource("3_llnbm")
 theme_override_font_sizes/font_size = 30
 text = "     Available Lobbies"
 
-[node name="join btn" type="Button" parent="home/lobby/play game/GridContainer/VBoxContainer2/Control/HBoxContainer"]
+[node name="join btn" type="Button" parent="CanvasLayer/home/lobby/play game/GridContainer/VBoxContainer2/Control/HBoxContainer"]
 layout_mode = 2
 theme = ExtResource("3_llnbm")
 theme_override_font_sizes/font_size = 25
 disabled = true
 text = "Join Game"
 
-[node name="lobbies" type="ItemList" parent="home/lobby/play game/GridContainer/VBoxContainer2/Control"]
+[node name="lobbies" type="ItemList" parent="CanvasLayer/home/lobby/play game/GridContainer/VBoxContainer2/Control"]
 layout_mode = 1
 offset_top = 61.0
 offset_right = 838.0
@@ -6115,7 +6126,7 @@ item_count = 2
 item_0/text = "abubakar lobby"
 item_1/text = "another dudes game"
 
-[node name="back btn" type="Button" parent="home/lobby"]
+[node name="back btn" type="Button" parent="CanvasLayer/home/lobby"]
 layout_mode = 1
 offset_left = 38.0
 offset_top = 32.0
@@ -6125,7 +6136,7 @@ theme = ExtResource("3_llnbm")
 theme_override_font_sizes/font_size = 25
 text = "Go Back"
 
-[node name="settings" type="MarginContainer" parent="home"]
+[node name="settings" type="MarginContainer" parent="CanvasLayer/home"]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -6138,40 +6149,40 @@ theme_override_constants/margin_top = 50
 theme_override_constants/margin_right = 50
 theme_override_constants/margin_bottom = 50
 
-[node name="ScrollContainer" type="ScrollContainer" parent="home/settings"]
+[node name="ScrollContainer" type="ScrollContainer" parent="CanvasLayer/home/settings"]
 layout_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="home/settings/ScrollContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/home/settings/ScrollContainer"]
 layout_mode = 2
 theme_override_constants/separation = 35
 
-[node name="HBoxContainer" type="HBoxContainer" parent="home/settings/ScrollContainer/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/home/settings/ScrollContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_constants/separation = 25
 
-[node name="Label" type="Label" parent="home/settings/ScrollContainer/VBoxContainer/HBoxContainer"]
+[node name="Label" type="Label" parent="CanvasLayer/home/settings/ScrollContainer/VBoxContainer/HBoxContainer"]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 theme = ExtResource("3_llnbm")
 text = "Username"
 
-[node name="username" type="LineEdit" parent="home/settings/ScrollContainer/VBoxContainer/HBoxContainer"]
+[node name="username" type="LineEdit" parent="CanvasLayer/home/settings/ScrollContainer/VBoxContainer/HBoxContainer"]
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 theme = ExtResource("3_llnbm")
 placeholder_text = "CoolGamer67"
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="home/settings/ScrollContainer/VBoxContainer"]
+[node name="HBoxContainer2" type="HBoxContainer" parent="CanvasLayer/home/settings/ScrollContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_constants/separation = 25
 
-[node name="Label" type="Label" parent="home/settings/ScrollContainer/VBoxContainer/HBoxContainer2"]
+[node name="Label" type="Label" parent="CanvasLayer/home/settings/ScrollContainer/VBoxContainer/HBoxContainer2"]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 theme = ExtResource("3_llnbm")
 text = "Mouse Sensitivity"
 
-[node name="sensitivity" type="HSlider" parent="home/settings/ScrollContainer/VBoxContainer/HBoxContainer2"]
+[node name="sensitivity" type="HSlider" parent="CanvasLayer/home/settings/ScrollContainer/VBoxContainer/HBoxContainer2"]
 custom_minimum_size = Vector2(200, 50)
 layout_mode = 2
 theme = ExtResource("3_llnbm")
@@ -6179,26 +6190,26 @@ min_value = 0.01
 max_value = 0.1
 value = 0.01
 
-[node name="HBoxContainer3" type="HBoxContainer" parent="home/settings/ScrollContainer/VBoxContainer"]
+[node name="HBoxContainer3" type="HBoxContainer" parent="CanvasLayer/home/settings/ScrollContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_constants/separation = 25
 
-[node name="Label" type="Label" parent="home/settings/ScrollContainer/VBoxContainer/HBoxContainer3"]
+[node name="Label" type="Label" parent="CanvasLayer/home/settings/ScrollContainer/VBoxContainer/HBoxContainer3"]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 theme = ExtResource("3_llnbm")
 text = "Sound Effects"
 
-[node name="sound" type="CheckButton" parent="home/settings/ScrollContainer/VBoxContainer/HBoxContainer3"]
+[node name="sound" type="CheckButton" parent="CanvasLayer/home/settings/ScrollContainer/VBoxContainer/HBoxContainer3"]
 layout_mode = 2
 theme = ExtResource("3_llnbm")
 
-[node name="go back" type="Button" parent="home/settings/ScrollContainer/VBoxContainer"]
+[node name="go back" type="Button" parent="CanvasLayer/home/settings/ScrollContainer/VBoxContainer"]
 layout_mode = 2
 theme = ExtResource("3_llnbm")
 text = "Go Back"
 
-[node name="select character" type="Control" parent="home"]
+[node name="select character" type="Control" parent="CanvasLayer/home"]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -6207,7 +6218,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="CenterContainer" type="CenterContainer" parent="home/select character"]
+[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer/home/select character"]
 layout_mode = 1
 anchors_preset = 4
 anchor_top = 0.5
@@ -6218,14 +6229,14 @@ offset_right = 248.0
 offset_bottom = 31.5
 grow_vertical = 2
 
-[node name="prev btn" type="Button" parent="home/select character/CenterContainer"]
+[node name="prev btn" type="Button" parent="CanvasLayer/home/select character/CenterContainer"]
 layout_mode = 2
 size_flags_horizontal = 6
 size_flags_vertical = 4
 theme = ExtResource("3_llnbm")
 text = "   🠜   "
 
-[node name="CenterContainer3" type="CenterContainer" parent="home/select character"]
+[node name="CenterContainer3" type="CenterContainer" parent="CanvasLayer/home/select character"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -6242,39 +6253,39 @@ scale = Vector2(0.56, 0.56)
 size_flags_horizontal = 4
 size_flags_vertical = 4
 
-[node name="SubViewportContainer" type="SubViewportContainer" parent="home/select character/CenterContainer3"]
+[node name="SubViewportContainer" type="SubViewportContainer" parent="CanvasLayer/home/select character/CenterContainer3"]
 layout_mode = 2
 
-[node name="SubViewport" type="SubViewport" parent="home/select character/CenterContainer3/SubViewportContainer"]
+[node name="SubViewport" type="SubViewport" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer"]
 transparent_bg = true
 handle_input_locally = false
 size = Vector2i(740, 1024)
 render_target_update_mode = 0
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="home/select character/CenterContainer3/SubViewportContainer/SubViewport"]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport"]
 transform = Transform3D(-0.763928, -0.242847, 0.597863, 0.494545, -0.815491, 0.300665, 0.414536, 0.525356, 0.743075, 0, 4.04303, 1.62523)
 light_energy = 1.107
 shadow_enabled = true
 
-[node name="DirectionalLight3D2" type="DirectionalLight3D" parent="home/select character/CenterContainer3/SubViewportContainer/SubViewport"]
+[node name="DirectionalLight3D2" type="DirectionalLight3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport"]
 transform = Transform3D(-0.331796, -0.659707, 0.674314, 0.399833, 0.54908, 0.733924, -0.854427, 0.513126, 0.0815897, 3.45803, 4.04303, -1.5006)
 light_energy = 1.107
 shadow_enabled = true
 
-[node name="DirectionalLight3D3" type="DirectionalLight3D" parent="home/select character/CenterContainer3/SubViewportContainer/SubViewport"]
+[node name="DirectionalLight3D3" type="DirectionalLight3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport"]
 transform = Transform3D(0.671216, 0.369873, -0.642388, 0.399833, 0.549081, 0.733924, 0.624182, -0.74947, 0.220665, -4.5138, 4.04303, -1.5006)
 light_energy = 1.107
 shadow_enabled = true
 
-[node name="Camera3D" type="Camera3D" parent="home/select character/CenterContainer3/SubViewportContainer/SubViewport"]
+[node name="Camera3D" type="Camera3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport"]
 transform = Transform3D(1, 0, 0, 0, 0.997163, 0.0752746, 0, -0.0752746, 0.997163, 0, 1.0295, 1.49709)
 
-[node name="model1" type="Node3D" parent="home/select character/CenterContainer3/SubViewportContainer/SubViewport"]
+[node name="model1" type="Node3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport"]
 
-[node name="Armature_001" type="Node3D" parent="home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1"]
+[node name="Armature_001" type="Node3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1"]
 transform = Transform3D(-1, -4.50317e-15, -1.50996e-07, 2.00972e-14, 1, -1.62921e-07, 1.50996e-07, -1.62921e-07, -1, -1.00546e-07, -2.55307e-08, 0)
 
-[node name="Skeleton3D" type="Skeleton3D" parent="home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001"]
+[node name="Skeleton3D" type="Skeleton3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001"]
 bones/0/name = "mixamorig_Hips"
 bones/0/parent = -1
 bones/0/rest = Transform3D(-0.990314, -0.0130808, -0.13823, -0.0196361, 0.998741, 0.0461663, 0.137452, 0.0484334, -0.989323, 0.0823167, 1.03597, 0.0116948)
@@ -6913,84 +6924,84 @@ bones/90/position = Vector3(0, 0.0686614, 0)
 bones/90/rotation = Quaternion(0, 0, 0, 1)
 bones/90/scale = Vector3(1, 1, 1)
 
-[node name="Farmer Joe" type="MeshInstance3D" parent="home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D"]
+[node name="Farmer Joe" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D"]
 mesh = SubResource("ArrayMesh_twg8p")
 skin = SubResource("Skin_b0dn7")
 
-[node name="Farmer_Body" type="MeshInstance3D" parent="home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D/Farmer Joe"]
+[node name="Farmer_Body" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D/Farmer Joe"]
 mesh = SubResource("ArrayMesh_npkpn")
 skin = SubResource("Skin_6wcoo")
 skeleton = NodePath("../..")
 
-[node name="King Tod" type="MeshInstance3D" parent="home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D"]
+[node name="King Tod" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D"]
 mesh = SubResource("ArrayMesh_5543w")
 skin = SubResource("Skin_3a5vp")
 
-[node name="King_Body" type="MeshInstance3D" parent="home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D/King Tod"]
+[node name="King_Body" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D/King Tod"]
 mesh = SubResource("ArrayMesh_6h4k3")
 skin = SubResource("Skin_yukr7")
 skeleton = NodePath("../..")
 
-[node name="Astra" type="MeshInstance3D" parent="home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D"]
+[node name="Astra" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D"]
 mesh = SubResource("ArrayMesh_1vt1n")
 skin = SubResource("Skin_dhvv4")
 
-[node name="SpaceSuit_Legs" type="MeshInstance3D" parent="home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D/Astra"]
+[node name="SpaceSuit_Legs" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D/Astra"]
 mesh = SubResource("ArrayMesh_mt01j")
 skin = SubResource("Skin_lgj0q")
 skeleton = NodePath("../..")
 
-[node name="Swat" type="MeshInstance3D" parent="home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D"]
+[node name="Swat" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D"]
 mesh = SubResource("ArrayMesh_y8h84")
 skin = SubResource("Skin_i44mb")
 
-[node name="Swat_Body_002" type="MeshInstance3D" parent="home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D/Swat"]
+[node name="Swat_Body_002" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D/Swat"]
 mesh = SubResource("ArrayMesh_h24jn")
 skin = SubResource("Skin_8iu5u")
 skeleton = NodePath("../..")
 
-[node name="Witch" type="MeshInstance3D" parent="home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D"]
+[node name="Witch" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D"]
 mesh = SubResource("ArrayMesh_nko8a")
 skin = SubResource("Skin_lha5r")
 
-[node name="Witch" type="MeshInstance3D" parent="home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D/Witch"]
+[node name="Witch" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D/Witch"]
 mesh = SubResource("ArrayMesh_l8je4")
 skin = SubResource("Skin_b58pt")
 skeleton = NodePath("../..")
 
-[node name="Trixie" type="MeshInstance3D" parent="home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D"]
+[node name="Trixie" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D"]
 mesh = SubResource("ArrayMesh_2cqpp")
 skin = SubResource("Skin_to1ao")
 
-[node name="cyber_001" type="MeshInstance3D" parent="home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D/Trixie"]
+[node name="cyber_001" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D/Trixie"]
 mesh = SubResource("ArrayMesh_5bmyn")
 skin = SubResource("Skin_twmjt")
 skeleton = NodePath("../..")
 
-[node name="Scout" type="MeshInstance3D" parent="home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D"]
+[node name="Scout" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D"]
 mesh = SubResource("ArrayMesh_n2nue")
 skin = SubResource("Skin_116x0")
 
-[node name="Scout_001" type="MeshInstance3D" parent="home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D/Scout"]
+[node name="Scout_001" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D/Scout"]
 mesh = SubResource("ArrayMesh_0pxc6")
 skin = SubResource("Skin_s1jbo")
 skeleton = NodePath("../..")
 
-[node name="Adventuress" type="MeshInstance3D" parent="home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D"]
+[node name="Adventuress" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D"]
 mesh = SubResource("ArrayMesh_40suc")
 skin = SubResource("Skin_5hx2b")
 
-[node name="Adventurer_001" type="MeshInstance3D" parent="home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D/Adventuress"]
+[node name="Adventurer_001" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D/Adventuress"]
 mesh = SubResource("ArrayMesh_tfgbp")
 skin = SubResource("Skin_p6vyk")
 skeleton = NodePath("../..")
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1"]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1"]
 libraries = {
 &"": SubResource("AnimationLibrary_llnbm")
 }
 
-[node name="CenterContainer2" type="CenterContainer" parent="home/select character"]
+[node name="CenterContainer2" type="CenterContainer" parent="CanvasLayer/home/select character"]
 layout_mode = 1
 anchors_preset = 6
 anchor_left = 1.0
@@ -7004,14 +7015,14 @@ offset_bottom = 31.5
 grow_horizontal = 0
 grow_vertical = 2
 
-[node name="next btn" type="Button" parent="home/select character/CenterContainer2"]
+[node name="next btn" type="Button" parent="CanvasLayer/home/select character/CenterContainer2"]
 layout_mode = 2
 size_flags_horizontal = 6
 size_flags_vertical = 4
 theme = ExtResource("3_llnbm")
 text = "   🠞   "
 
-[node name="Label" type="Label" parent="home/select character"]
+[node name="Label" type="Label" parent="CanvasLayer/home/select character"]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
@@ -7025,7 +7036,7 @@ theme = ExtResource("3_llnbm")
 theme_override_font_sizes/font_size = 60
 text = "Select a Player"
 
-[node name="confirm" type="Button" parent="home/select character"]
+[node name="confirm" type="Button" parent="CanvasLayer/home/select character"]
 layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0
@@ -7041,15 +7052,26 @@ grow_vertical = 0
 theme = ExtResource("3_llnbm")
 text = " Confirm "
 
-[connection signal="pressed" from="home/main/VBoxContainer/play btn" to="." method="_on_play_btn_pressed"]
-[connection signal="pressed" from="home/main/VBoxContainer/select btn" to="." method="_on_select_btn_pressed"]
-[connection signal="pressed" from="home/main/VBoxContainer/settings btn" to="." method="_on_settings_btn_pressed"]
-[connection signal="pressed" from="home/main/VBoxContainer/exit btn" to="." method="_on_exit_btn_pressed"]
-[connection signal="pressed" from="home/lobby/play game/GridContainer/VBoxContainer/host btn" to="." method="_on_host_btn_pressed"]
-[connection signal="pressed" from="home/lobby/play game/GridContainer/VBoxContainer2/Control/HBoxContainer/join btn" to="." method="_on_join_btn_pressed"]
-[connection signal="item_selected" from="home/lobby/play game/GridContainer/VBoxContainer2/Control/lobbies" to="." method="_on_lobbies_item_selected"]
-[connection signal="pressed" from="home/lobby/back btn" to="." method="_on_back_btn_pressed"]
-[connection signal="pressed" from="home/settings/ScrollContainer/VBoxContainer/go back" to="." method="_on_go_back_pressed"]
-[connection signal="pressed" from="home/select character/CenterContainer/prev btn" to="." method="_on_prev_btn_pressed"]
-[connection signal="pressed" from="home/select character/CenterContainer2/next btn" to="." method="_on_next_btn_pressed"]
-[connection signal="pressed" from="home/select character/confirm" to="." method="_on_confirm_pressed"]
+[node name="World" parent="." instance=ExtResource("7_nw1ns")]
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="World"]
+_spawnable_scenes = PackedStringArray("uid://caaywv6k1uc12")
+spawn_path = NodePath("..")
+script = ExtResource("8_8riyq")
+network_player = ExtResource("9_gyiet")
+
+[connection signal="pressed" from="CanvasLayer/home/main/VBoxContainer/play btn" to="CanvasLayer" method="_on_play_btn_pressed"]
+[connection signal="pressed" from="CanvasLayer/home/main/VBoxContainer/select btn" to="CanvasLayer" method="_on_select_btn_pressed"]
+[connection signal="pressed" from="CanvasLayer/home/main/VBoxContainer/settings btn" to="CanvasLayer" method="_on_settings_btn_pressed"]
+[connection signal="pressed" from="CanvasLayer/home/main/VBoxContainer/exit btn" to="CanvasLayer" method="_on_exit_btn_pressed"]
+[connection signal="pressed" from="CanvasLayer/home/lobby/play game/GridContainer/VBoxContainer/host btn" to="CanvasLayer" method="_on_host_btn_pressed"]
+[connection signal="pressed" from="CanvasLayer/home/lobby/play game/GridContainer/VBoxContainer2/Control/HBoxContainer/join btn" to="CanvasLayer" method="_on_join_btn_pressed"]
+[connection signal="item_selected" from="CanvasLayer/home/lobby/play game/GridContainer/VBoxContainer2/Control/lobbies" to="CanvasLayer" method="_on_lobbies_item_selected"]
+[connection signal="pressed" from="CanvasLayer/home/lobby/back btn" to="CanvasLayer" method="_on_back_btn_pressed"]
+[connection signal="pressed" from="CanvasLayer/home/settings/ScrollContainer/VBoxContainer/go back" to="CanvasLayer" method="_on_go_back_pressed"]
+[connection signal="pressed" from="CanvasLayer/home/select character/CenterContainer/prev btn" to="CanvasLayer" method="_on_prev_btn_pressed"]
+[connection signal="pressed" from="CanvasLayer/home/select character/CenterContainer2/next btn" to="CanvasLayer" method="_on_next_btn_pressed"]
+[connection signal="pressed" from="CanvasLayer/home/select character/confirm" to="CanvasLayer" method="_on_confirm_pressed"]
+
+[editable path="World"]
+[editable path="World/map1"]

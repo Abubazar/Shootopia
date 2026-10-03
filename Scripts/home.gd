@@ -6,6 +6,8 @@ extends CanvasLayer
 @onready var select_characterScreen: Control = $"home/select character"
 @onready var animplayer: AnimationPlayer = $"home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/AnimationPlayer"
 @onready var models: Skeleton3D = $"home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D"
+@onready var world: Node3D = $"../World"
+@onready var network_manager: Network_manager = $"../Network_manager"
 
 var charIdx = 0
 var charNames = [
@@ -24,6 +26,7 @@ func _ready() -> void:
 	mainScreen.visible = true
 	animplayer.play("idle")
 	setCharacter(charNames[charIdx])
+	world.visible = false
 
 
 func setCharacter(cNam):
@@ -31,12 +34,10 @@ func setCharacter(cNam):
 		char.visible = true if cNam == char.name else false
 	
 
-func _process(delta: float) -> void:
-	pass
-
 #home functions
 func play():
-	pass
+	mainScreen.visible = false
+	lobbyScreen.visible = true
 	
 func settings():
 	mainScreen.visible = false
@@ -49,10 +50,10 @@ func select():
 	
 #lobby functions
 func host():
-	pass
+	network_manager.create_server()
 	
 func join():
-	pass
+	network_manager.join_server()
 	
 func lobby_selected(index):
 	pass
