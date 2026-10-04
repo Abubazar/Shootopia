@@ -1,8 +1,5 @@
 extends CharacterBody3D
 
-func _enter_tree() -> void:
-	set_multiplayer_authority(id_val)
-
 # MOVEMENT
 
 var SPEED := 8.0
@@ -17,9 +14,6 @@ const GRAVITY := Vector3(0, -20, 0)
 @onready var weapon_map = $spine/head/Camera3D/CanvasLayer/Control/PanelContainer/MarginContainer/weaponMap
 @onready var killCounter: Label = $"spine/head/Camera3D/CanvasLayer/kills label"
 @onready var kill_status: ItemList = $"spine/head/Camera3D/CanvasLayer/kill status"
-
-
-@export var id_val:int
 
 
 @onready var particle = preload("res://Scenes/particle.tscn")
@@ -37,7 +31,7 @@ var reloading = false
 var changing = false
 var weaponToChange = null
 var killCount = 0
-var trappedMouse = true
+var trappedMouse = false
 
 #players
 @export_enum(
@@ -58,16 +52,17 @@ var character_type := "Farmer Joe"
 @onready var spine_ik = $characters/Armature_001/Skeleton3D/SkeletonIK3D
 @onready var ragdollSkeleton = $characters/Armature_001/Skeleton3D/PhysicalBoneSimulator3D
 
-func setName(name):
-	playerLabel.text = name
-	playerName = name
+func setName(cNam):
+	playerLabel.text = cNam
+	playerName = cNam
+	
 func setup_character():
 	for character in skeleton.get_children():
 		character.visible = character.name == character_type
 
-		if character.name == character_type:
-			character.get_node("body").visible = false
-			playerLabel.visible = false
+		if character.name == character_type and is_multiplayer_authority():
+			character.get_node("body").hide()
+			playerLabel.hide()
 
 	spine_ik.start()
 	setup_weapon()
@@ -86,8 +81,8 @@ var currentWeapon := "Pistol"
 @onready var gunParent = $characters/Armature_001/Skeleton3D/BoneAttachment3D
 @onready var guns = gunParent.get_node("guns")
 
-func setGun(name: String):
-	var item = name+"Img"
+func setGun(cNam: String):
+	var item = cNam+"Img"
 	for gun in weapon_map.get_children():
 		if gun.name == item:
 			gun.material.blend_mode = CanvasItemMaterial.BLEND_MODE_MUL
@@ -175,24 +170,23 @@ func shootSystem(delta):
 				parti.look_at(parti.global_position + normal, Vector3.UP)
 				if hit.collision_layer == 2 or hit.name == "headArea":
 					if hit.health >0:
-						hit.gotHit("body",weaponsInventory[currentWeapon]['damage'],name)
+						hit.gotHit("body",weaponsInventory[currentWeapon]['damage'],playerName)
 						parti.set_color(Color("ff0000"))
-						gotHit('body',10,name)
 				else:
 					parti.set_color(Color("3f3f3f"))
 	shootCooldown+=delta
 
-func gotHit(area,damage,player_name):
+func gotHit(area,dmg,player_name):
 	if area=="headshot":
-		health -=damage*2
+		health -=dmg*2
 	else:
-		health-=damage
+		health-=dmg
 	if health <=0:
 		ragdollSkeleton.physical_bones_start_simulation()
 		collision_layer = 14
-		if player_name == name:
+		if player_name == playerName:
 			killCount +=1
-			kill_status.add_kill(name+" Killed "+"mortyyy")
+			kill_status.add_kill(playerName+" Killed "+"mortyyy")
 			killCounter.text = "Kills: " + str(killCount)
 			print(killCount)
 		if not waitingRespawn:
@@ -266,6 +260,7 @@ var t_bob := 0.0
 func _unhandled_input(event):
 	if not is_multiplayer_authority():
 		return
+	
 	if event is InputEventMouseMotion and trappedMouse:
 		rotate_y(-event.relative.x * SENSITIVITY)
 
@@ -387,10 +382,32 @@ func playerMovement(delta):
 		
 	if Input.is_action_just_pressed("tab"):
 		trappedMouse = not trappedMouse
+		if trappedMouse:
+			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+		else:
+			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 
 # READY
 func _ready():
-	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	# Every player's camera starts OFF.
+	camera.current = false
+
+	setup_character()
+
+	# Only the player controlled by this peer gets the camera.
+	if not is_multiplayer_authority():
+		return
+
+	camera.current = true
+
+	print(
+		"CAMERA ACTIVE | player = ",
+		name,
+		" | authority = ",
+		get_multiplayer_authority(),
+		" | my_id = ",
+		multiplayer.get_unique_id()
+	)
 
 # PHYSICS
 

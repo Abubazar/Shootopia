@@ -21,9 +21,6 @@ script = ExtResource("1_5a7ea")
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_fj7yv")
 
-[node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.824432, 0.56596, 0, -0.56596, 0.824432, 0, 13.975, 18.8678)
-
 [node name="map1" parent="." instance=ExtResource("3_fo5ed")]
 transform = Transform3D(3.325, 0, 0, 0, 3.325, 0, 0, 0, 3.325, 0, -8.89327, 0)
 

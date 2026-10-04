@@ -4,10 +4,11 @@ extends CanvasLayer
 @onready var lobbyScreen: Control = $home/lobby
 @onready var settingsScreen: MarginContainer = $home/settings
 @onready var select_characterScreen: Control = $"home/select character"
-@onready var animplayer: AnimationPlayer = $"home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/AnimationPlayer"
-@onready var models: Skeleton3D = $"home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D"
+@onready var animplayer: AnimationPlayer = $"home/select character/CenterContainer3/SubViewportContainer/SubViewport/Node3D/model1/AnimationPlayer"
+@onready var models: Skeleton3D = $"home/select character/CenterContainer3/SubViewportContainer/SubViewport/Node3D/model1/Armature_001/Skeleton3D"
 @onready var world: Node3D = $"../World"
 @onready var network_manager: Network_manager = $"../Network_manager"
+@onready var scene3d = $"home/select character/CenterContainer3/SubViewportContainer/SubViewport/Node3D/"
 
 var charIdx = 0
 var charNames = [
@@ -27,6 +28,7 @@ func _ready() -> void:
 	animplayer.play("idle")
 	setCharacter(charNames[charIdx])
 	world.visible = false
+	scene3d.visible = false
 
 
 func setCharacter(cNam):
@@ -46,6 +48,7 @@ func settings():
 func select():
 	mainScreen.visible = false
 	select_characterScreen.visible = true
+	scene3d.visible = true
 
 	
 #lobby functions
@@ -62,6 +65,7 @@ func go_back():
 	lobbyScreen.visible = false
 	settingsScreen.visible = false
 	mainScreen.visible = true
+	scene3d.visible = false
 
 
 #character selection
@@ -76,6 +80,7 @@ func next():
 func confirm():
 	select_characterScreen.visible = false
 	mainScreen.visible = true
+	scene3d.visible = false
 	Glob.character = charIdx
 	Glob.save_data()
 

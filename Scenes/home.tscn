@@ -1,4 +1,4 @@
-[gd_scene load_steps=102 format=4 uid="uid://ch4ltjwsrn4hk"]
+[gd_scene load_steps=100 format=4 uid="uid://ch4ltjwsrn4hk"]
 
 [ext_resource type="Script" uid="uid://b4x7av6vunltk" path="res://Scripts/home.gd" id="1_12ycv"]
 [ext_resource type="Texture2D" uid="uid://jg2fl65upej2" path="res://image assets/background.png" id="1_ibywg"]
@@ -7,8 +7,6 @@
 [ext_resource type="Theme" uid="uid://cbm1tejt81duc" path="res://Scripts/game theme.tres" id="3_llnbm"]
 [ext_resource type="Script" uid="uid://6w65ickay0u0" path="res://Scripts/network_manager.gd" id="6_cykap"]
 [ext_resource type="PackedScene" uid="uid://c2w074dogbaxm" path="res://Scenes/world.tscn" id="7_nw1ns"]
-[ext_resource type="Script" uid="uid://0dcdtmg3twsv" path="res://Scripts/multiplayer_spawner.gd" id="8_8riyq"]
-[ext_resource type="PackedScene" uid="uid://caaywv6k1uc12" path="res://Scenes/player.tscn" id="9_gyiet"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_fhpuh"]
 font = ExtResource("2_12ycv")
@@ -6111,10 +6109,10 @@ text = "     Available Lobbies"
 
 [node name="join btn" type="Button" parent="CanvasLayer/home/lobby/play game/GridContainer/VBoxContainer2/Control/HBoxContainer"]
 layout_mode = 2
+size_flags_horizontal = 4
 theme = ExtResource("3_llnbm")
 theme_override_font_sizes/font_size = 25
-disabled = true
-text = "Join Game"
+text = "Join this game"
 
 [node name="lobbies" type="ItemList" parent="CanvasLayer/home/lobby/play game/GridContainer/VBoxContainer2/Control"]
 layout_mode = 1
@@ -6262,30 +6260,32 @@ handle_input_locally = false
 size = Vector2i(740, 1024)
 render_target_update_mode = 0
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport"]
+[node name="Node3D" type="Node3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport"]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/Node3D"]
 transform = Transform3D(-0.763928, -0.242847, 0.597863, 0.494545, -0.815491, 0.300665, 0.414536, 0.525356, 0.743075, 0, 4.04303, 1.62523)
 light_energy = 1.107
 shadow_enabled = true
 
-[node name="DirectionalLight3D2" type="DirectionalLight3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport"]
-transform = Transform3D(-0.331796, -0.659707, 0.674314, 0.399833, 0.54908, 0.733924, -0.854427, 0.513126, 0.0815897, 3.45803, 4.04303, -1.5006)
+[node name="DirectionalLight3D2" type="DirectionalLight3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/Node3D"]
+transform = Transform3D(-0.331796, -0.659707, 0.674313, 0.399833, 0.54908, 0.733924, -0.854427, 0.513126, 0.08159, 3.45803, 4.04303, -1.5006)
 light_energy = 1.107
 shadow_enabled = true
 
-[node name="DirectionalLight3D3" type="DirectionalLight3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport"]
-transform = Transform3D(0.671216, 0.369873, -0.642388, 0.399833, 0.549081, 0.733924, 0.624182, -0.74947, 0.220665, -4.5138, 4.04303, -1.5006)
+[node name="DirectionalLight3D3" type="DirectionalLight3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/Node3D"]
+transform = Transform3D(0.671216, 0.369873, -0.642389, 0.399833, 0.549081, 0.733924, 0.624182, -0.749469, 0.220664, -4.5138, 4.04303, -1.5006)
 light_energy = 1.107
 shadow_enabled = true
 
-[node name="Camera3D" type="Camera3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport"]
+[node name="Camera3D" type="Camera3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/Node3D"]
 transform = Transform3D(1, 0, 0, 0, 0.997163, 0.0752746, 0, -0.0752746, 0.997163, 0, 1.0295, 1.49709)
 
-[node name="model1" type="Node3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport"]
+[node name="model1" type="Node3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/Node3D"]
 
-[node name="Armature_001" type="Node3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1"]
+[node name="Armature_001" type="Node3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/Node3D/model1"]
 transform = Transform3D(-1, -4.50317e-15, -1.50996e-07, 2.00972e-14, 1, -1.62921e-07, 1.50996e-07, -1.62921e-07, -1, -1.00546e-07, -2.55307e-08, 0)
 
-[node name="Skeleton3D" type="Skeleton3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001"]
+[node name="Skeleton3D" type="Skeleton3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/Node3D/model1/Armature_001"]
 bones/0/name = "mixamorig_Hips"
 bones/0/parent = -1
 bones/0/rest = Transform3D(-0.990314, -0.0130808, -0.13823, -0.0196361, 0.998741, 0.0461663, 0.137452, 0.0484334, -0.989323, 0.0823167, 1.03597, 0.0116948)
@@ -6924,79 +6924,79 @@ bones/90/position = Vector3(0, 0.0686614, 0)
 bones/90/rotation = Quaternion(0, 0, 0, 1)
 bones/90/scale = Vector3(1, 1, 1)
 
-[node name="Farmer Joe" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D"]
+[node name="Farmer Joe" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/Node3D/model1/Armature_001/Skeleton3D"]
 mesh = SubResource("ArrayMesh_twg8p")
 skin = SubResource("Skin_b0dn7")
 
-[node name="Farmer_Body" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D/Farmer Joe"]
+[node name="Farmer_Body" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/Node3D/model1/Armature_001/Skeleton3D/Farmer Joe"]
 mesh = SubResource("ArrayMesh_npkpn")
 skin = SubResource("Skin_6wcoo")
 skeleton = NodePath("../..")
 
-[node name="King Tod" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D"]
+[node name="King Tod" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/Node3D/model1/Armature_001/Skeleton3D"]
 mesh = SubResource("ArrayMesh_5543w")
 skin = SubResource("Skin_3a5vp")
 
-[node name="King_Body" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D/King Tod"]
+[node name="King_Body" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/Node3D/model1/Armature_001/Skeleton3D/King Tod"]
 mesh = SubResource("ArrayMesh_6h4k3")
 skin = SubResource("Skin_yukr7")
 skeleton = NodePath("../..")
 
-[node name="Astra" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D"]
+[node name="Astra" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/Node3D/model1/Armature_001/Skeleton3D"]
 mesh = SubResource("ArrayMesh_1vt1n")
 skin = SubResource("Skin_dhvv4")
 
-[node name="SpaceSuit_Legs" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D/Astra"]
+[node name="SpaceSuit_Legs" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/Node3D/model1/Armature_001/Skeleton3D/Astra"]
 mesh = SubResource("ArrayMesh_mt01j")
 skin = SubResource("Skin_lgj0q")
 skeleton = NodePath("../..")
 
-[node name="Swat" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D"]
+[node name="Swat" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/Node3D/model1/Armature_001/Skeleton3D"]
 mesh = SubResource("ArrayMesh_y8h84")
 skin = SubResource("Skin_i44mb")
 
-[node name="Swat_Body_002" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D/Swat"]
+[node name="Swat_Body_002" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/Node3D/model1/Armature_001/Skeleton3D/Swat"]
 mesh = SubResource("ArrayMesh_h24jn")
 skin = SubResource("Skin_8iu5u")
 skeleton = NodePath("../..")
 
-[node name="Witch" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D"]
+[node name="Witch" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/Node3D/model1/Armature_001/Skeleton3D"]
 mesh = SubResource("ArrayMesh_nko8a")
 skin = SubResource("Skin_lha5r")
 
-[node name="Witch" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D/Witch"]
+[node name="Witch" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/Node3D/model1/Armature_001/Skeleton3D/Witch"]
 mesh = SubResource("ArrayMesh_l8je4")
 skin = SubResource("Skin_b58pt")
 skeleton = NodePath("../..")
 
-[node name="Trixie" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D"]
+[node name="Trixie" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/Node3D/model1/Armature_001/Skeleton3D"]
 mesh = SubResource("ArrayMesh_2cqpp")
 skin = SubResource("Skin_to1ao")
 
-[node name="cyber_001" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D/Trixie"]
+[node name="cyber_001" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/Node3D/model1/Armature_001/Skeleton3D/Trixie"]
 mesh = SubResource("ArrayMesh_5bmyn")
 skin = SubResource("Skin_twmjt")
 skeleton = NodePath("../..")
 
-[node name="Scout" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D"]
+[node name="Scout" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/Node3D/model1/Armature_001/Skeleton3D"]
 mesh = SubResource("ArrayMesh_n2nue")
 skin = SubResource("Skin_116x0")
 
-[node name="Scout_001" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D/Scout"]
+[node name="Scout_001" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/Node3D/model1/Armature_001/Skeleton3D/Scout"]
 mesh = SubResource("ArrayMesh_0pxc6")
 skin = SubResource("Skin_s1jbo")
 skeleton = NodePath("../..")
 
-[node name="Adventuress" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D"]
+[node name="Adventuress" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/Node3D/model1/Armature_001/Skeleton3D"]
 mesh = SubResource("ArrayMesh_40suc")
 skin = SubResource("Skin_5hx2b")
 
-[node name="Adventurer_001" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1/Armature_001/Skeleton3D/Adventuress"]
+[node name="Adventurer_001" type="MeshInstance3D" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/Node3D/model1/Armature_001/Skeleton3D/Adventuress"]
 mesh = SubResource("ArrayMesh_tfgbp")
 skin = SubResource("Skin_p6vyk")
 skeleton = NodePath("../..")
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/model1"]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="CanvasLayer/home/select character/CenterContainer3/SubViewportContainer/SubViewport/Node3D/model1"]
 libraries = {
 &"": SubResource("AnimationLibrary_llnbm")
 }
@@ -7053,12 +7053,6 @@ theme = ExtResource("3_llnbm")
 text = " Confirm "
 
 [node name="World" parent="." instance=ExtResource("7_nw1ns")]
-
-[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="World"]
-_spawnable_scenes = PackedStringArray("uid://caaywv6k1uc12")
-spawn_path = NodePath("..")
-script = ExtResource("8_8riyq")
-network_player = ExtResource("9_gyiet")
 
 [connection signal="pressed" from="CanvasLayer/home/main/VBoxContainer/play btn" to="CanvasLayer" method="_on_play_btn_pressed"]
 [connection signal="pressed" from="CanvasLayer/home/main/VBoxContainer/select btn" to="CanvasLayer" method="_on_select_btn_pressed"]
