@@ -10,65 +10,80 @@ const GRAVITY := Vector3(0, -20, 0)
 @onready var camera = $spine/head/Camera3D
 @onready var spine3d = $spine
 @onready var rayCast = $spine/RayCast3D
-@onready var healthBar = $spine/head/Camera3D/CanvasLayer/MarginContainer/ProgressBar
+@onready var hud = $spine/head/Camera3D/CanvasLayer
 @onready var weapon_map = $spine/head/Camera3D/CanvasLayer/Control/PanelContainer/MarginContainer/weaponMap
-@onready var killCounter: Label = $"spine/head/Camera3D/CanvasLayer/kills label"
-@onready var kill_status: ItemList = $"spine/head/Camera3D/CanvasLayer/kill status"
-
 
 @onready var particle = preload("res://Scenes/particle.tscn")
-
 
 # PLAYER
 
 @onready var model = $characters
 var playerName = "Player"
 @onready var playerLabel: Label3D = $PlayerName
-var health = 100
+@export var health = 100
 var damage = 0
 var waitingRespawn = false
 var reloading = false
 var changing = false
-var weaponToChange = null
+var weaponToChange = "Pistol"
 var killCount = 0
 var trappedMouse = false
+var looking_aim = false
 
-#players
-@export_enum(
+var chars = [
 	"Farmer Joe",
 	"King Tod",
 	"Astra",
 	"Swat",
-	"Adventuress",
-	"Scout",
 	"Witch",
-	"Trixie"
-)
-var character_type := "Farmer Joe"
+	"Trixie",
+	"Scout",
+	"Adventuress"
+]
+
+# Synced by the MultiplayerSynchronizer. The setter re-applies the model
+# on every peer (including late joiners) whenever the value arrives.
+var character_type := 0:
+	set(value):
+		character_type = value
+		if skeleton != null:
+			_apply_character()
 
 @onready var skeleton = $characters/Armature_001/Skeleton3D
 @onready var animTree = $characters/AnimationTree
 @onready var animPlayer = $characters/AnimationPlayer
 @onready var spine_ik = $characters/Armature_001/Skeleton3D/SkeletonIK3D
 @onready var ragdollSkeleton = $characters/Armature_001/Skeleton3D/PhysicalBoneSimulator3D
+@onready var aim_2 = $spine/head/Camera3D/CanvasLayer/aim2
+
 
 func setName(cNam):
 	playerLabel.text = cNam
 	playerName = cNam
-	
-func setup_character():
-	for character in skeleton.get_children():
-		character.visible = character.name == character_type
 
-		if character.name == character_type and is_multiplayer_authority():
+
+func _apply_character():
+	for character in skeleton.get_children():
+		if not chars.has(character.name):
+			continue
+		character.visible = character.name == chars[character_type]
+
+		if character.name == chars[character_type] and is_multiplayer_authority():
 			character.get_node("body").hide()
 			playerLabel.hide()
 
+
+func setup_character():
+	if is_multiplayer_authority():
+		character_type = Glob.character
+	_apply_character()
 	spine_ik.start()
 	setup_weapon()
 
+
 # WEAPONS
 
+# Synced by the MultiplayerSynchronizer so late joiners see the right gun.
 @export_enum(
 	"Pistol",
 	"Assault Rifle",
@@ -76,18 +91,24 @@ func setup_character():
 	"Sniper Rifle",
 	"Submachine Gun"
 )
-var currentWeapon := "Pistol"
+var currentWeapon := "Pistol":
+	set(value):
+		currentWeapon = value
+		if guns != null:
+			setup_weapon()
 
 @onready var gunParent = $characters/Armature_001/Skeleton3D/BoneAttachment3D
 @onready var guns = gunParent.get_node("guns")
 
+
 func setGun(cNam: String):
-	var item = cNam+"Img"
+	var item = cNam + "Img"
 	for gun in weapon_map.get_children():
 		if gun.name == item:
 			gun.material.blend_mode = CanvasItemMaterial.BLEND_MODE_MUL
 		else:
 			gun.material.blend_mode = CanvasItemMaterial.BLEND_MODE_MIX
+
 
 var weaponsInventory = {
 	"Pistol": {
@@ -97,7 +118,6 @@ var weaponsInventory = {
 		"damage": 25,
 		"cooldown": 0.25
 	},
-
 	"Assault Rifle": {
 		"magazine": 30,
 		"reload": 30,
@@ -105,7 +125,6 @@ var weaponsInventory = {
 		"damage": 25,
 		"cooldown": 0.09
 	},
-
 	"Shotgun": {
 		"magazine": 8,
 		"reload": 8,
@@ -113,7 +132,6 @@ var weaponsInventory = {
 		"damage": 80,
 		"cooldown": 0.80
 	},
-
 	"Sniper Rifle": {
 		"magazine": 5,
 		"reload": 5,
@@ -121,7 +139,6 @@ var weaponsInventory = {
 		"damage": 100,
 		"cooldown": 1.20
 	},
-
 	"Submachine Gun": {
 		"magazine": 30,
 		"reload": 30,
@@ -131,70 +148,194 @@ var weaponsInventory = {
 	}
 }
 
+
 func showWeaponInfo():
 	for gun in weapon_map.get_children():
 		var prop = weaponsInventory[gun.name.trim_suffix("Img")]
 		var item = str(prop["magazine"]) + "/" + str(prop["ammo"])
 		gun.get_node("Label").text = item
-	
+
+
 func setup_weapon():
 	gunParent.visible = true
-
 	for gun in guns.get_children():
 		gun.visible = gun.name == currentWeapon
-
-		if gun.name == currentWeapon:
-			currentWeapon = gun.name
-	
 	setGun(currentWeapon)
 	showWeaponInfo()
 
 
-#weapon shooting system
+# ---------- Weapon switching / reloading (animations play on ALL peers) ----------
+
+const WEAPON_KEYS := {
+	"gun1": "Pistol",
+	"gun2": "Shotgun",
+	"gun3": "Sniper Rifle",
+	"gun4": "Submachine Gun",
+	"gun5": "Assault Rifle"
+}
+
+
+func _try_change_weapon():
+	if reloading or changing:
+		return
+	for action in WEAPON_KEYS:
+		var weapon = WEAPON_KEYS[action]
+		if Input.is_action_just_pressed(action) and currentWeapon != weapon:
+			changing = true
+			start_change.rpc(weapon)
+			return
+
+
+@rpc("authority", "call_local", "reliable")
+func start_change(weapon: String):
+	weaponToChange = weapon
+	animTree.set("parameters/change/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+
+
+@rpc("authority", "call_local", "reliable")
+func start_reload():
+	animTree.set("parameters/reload/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+
+
+# Called from the animation (runs on every peer). The setter updates visuals.
+func changeWeapon():
+	currentWeapon = weaponToChange
+
+
+func doneChange():
+	changing = false
+
+
+func doneReload():
+	# Ammo bookkeeping only matters for the owner.
+	if not is_multiplayer_authority():
+		return
+	reloading = false
+	var wpn = weaponsInventory[currentWeapon]
+	var needed = wpn["reload"] - wpn["magazine"]
+	var taken = min(needed, wpn["ammo"])
+	wpn["magazine"] += taken
+	wpn["ammo"] -= taken
+	showWeaponInfo()
+
+
+# ---------- Shooting ----------
+# The shooter's machine does the raycast, then tells everyone to play the
+# effects, and tells the victim's owner about the damage.
+
 var shootCooldown = 0
+
+
 func shootSystem(delta):
+	# Only the owner of this player shoots.
 	if isShooting:
-		if shootCooldown >= weaponsInventory[currentWeapon]["cooldown"] && weaponsInventory[currentWeapon]['magazine'] > 0:
-			animTree.set("parameters/shoot/request",AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
-			weaponsInventory[currentWeapon]["magazine"]-=1
+		var wpn = weaponsInventory[currentWeapon]
+		if shootCooldown >= wpn["cooldown"] and wpn["magazine"] > 0:
+			wpn["magazine"] -= 1
 			shootCooldown = 0
 			showWeaponInfo()
 			rayCast.force_raycast_update()
-			if rayCast.is_colliding():
-				var hit = rayCast.get_collider()
-				
-				var parti = particle.instantiate()
-				get_tree().current_scene.add_child(parti)
-				parti.global_position = rayCast.get_collision_point()
-				var normal = rayCast.get_collision_normal()
-				parti.look_at(parti.global_position + normal, Vector3.UP)
-				if hit.collision_layer == 2 or hit.name == "headArea":
-					if hit.health >0:
-						hit.gotHit("body",weaponsInventory[currentWeapon]['damage'],playerName)
-						parti.set_color(Color("ff0000"))
-				else:
-					parti.set_color(Color("3f3f3f"))
-	shootCooldown+=delta
 
-func gotHit(area,dmg,player_name):
-	if area=="headshot":
-		health -=dmg*2
+			var has_hit = rayCast.is_colliding()
+			var point := Vector3.ZERO
+			var normal := Vector3.UP
+			var damaged := false
+
+			if has_hit:
+				var hit = rayCast.get_collider()
+				point = rayCast.get_collision_point()
+				normal = rayCast.get_collision_normal()
+
+				if hit.collision_layer == 2 or hit.name == "headArea":
+					if hit.health > 0:
+						var area = "headshot" if hit.name == "headArea" else "body"
+						hit.gotHit(area, wpn["damage"], playerName)
+						damaged = true
+
+			shoot_fx.rpc(has_hit, point, normal, damaged)
+	shootCooldown += delta
+
+
+# Plays on every peer (including the shooter): animation + impact particles.
+@rpc("authority", "call_local", "unreliable")
+func shoot_fx(has_hit: bool, point: Vector3, normal: Vector3, damaged: bool):
+	animTree.set("parameters/shoot/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+	if not has_hit:
+		return
+
+	var parti = particle.instantiate()
+	get_tree().current_scene.add_child(parti)
+	parti.global_position = point
+	var up = Vector3.UP if abs(normal.dot(Vector3.UP)) < 0.99 else Vector3.RIGHT
+	parti.look_at(point + normal, up)
+	if damaged:
+		parti.set_color(Color("ff0000"))
 	else:
-		health-=dmg
-	if health <=0:
+		parti.set_color(Color("3f3f3f"))
+
+
+# ---------- Taking damage ----------
+# Flow:  shooter calls hit.gotHit()  ->  RPC to the victim's owner (receive_hit)
+#        -> owner computes health -> apply_health RPC to everybody.
+
+func gotHit(area, dmg, player_name):
+	if is_multiplayer_authority():
+		receive_hit(area, dmg, player_name)
+	else:
+		receive_hit.rpc_id(get_multiplayer_authority(), area, dmg, player_name)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func receive_hit(area: String, dmg: int, shooter_name: String):
+	if not is_multiplayer_authority() or health <= 0:
+		return
+	var total = dmg * 2 if area == "headshot" else dmg
+	apply_health.rpc(health - total)
+
+
+@rpc("authority", "call_local", "reliable")
+func apply_health(new_health: int):
+	var was_alive = health > 0
+	health = new_health
+	_update_head_health()
+
+	if health <= 0 and was_alive:
 		ragdollSkeleton.physical_bones_start_simulation()
 		collision_layer = 14
-		if player_name == playerName:
-			killCount +=1
-			kill_status.add_kill(playerName+" Killed "+"mortyyy")
-			killCounter.text = "Kills: " + str(killCount)
-			print(killCount)
-		if not waitingRespawn:
+		if is_multiplayer_authority():
 			$Timer.start()
-	$characters/Armature_001/Skeleton3D/headCollision/headArea.health = health
-	var tween = create_tween()
-	tween.tween_property(healthBar,"value",health,0.3)
-# ANIMATION
+
+
+func _update_head_health():
+	var head_area = get_node_or_null("characters/Armature_001/Skeleton3D/headCollision/headArea")
+	if head_area:
+		head_area.health = health
+
+
+# Only the owner's Timer is ever started, so this only runs on the owner.
+func _on_timer_timeout() -> void:
+	var children = get_parent().get_node("spawn_points").get_children()
+	var spawn = children[randi() % children.size()]
+	respawn.rpc(spawn.global_position)
+
+
+@rpc("authority", "call_local", "reliable")
+func respawn(pos: Vector3):
+	ragdollSkeleton.physical_bones_stop_simulation()
+	collision_layer = 2
+	velocity = Vector3.ZERO
+	global_position = pos
+	health = 100
+	_update_head_health()
+	waitingRespawn = false
+
+	if is_multiplayer_authority():
+		for w in weaponsInventory.values():
+			w["magazine"] = w["reload"]
+		showWeaponInfo()
+
+
+# ---------- Animation ----------
 enum {
 	IDLE,
 	RUN,
@@ -209,6 +350,7 @@ enum {
 	CHANGE
 }
 
+# Synced by the MultiplayerSynchronizer; every peer blends locally.
 var curAnim := IDLE
 var isShooting = false
 
@@ -231,12 +373,8 @@ var anim_weights := {
 func handle_animations(delta):
 	for anim in anim_weights:
 		var target := 1.0 if curAnim == anim else 0.0
+		anim_weights[anim] = lerpf(anim_weights[anim], target, blendSpeed * delta)
 
-		anim_weights[anim] = lerpf(
-			anim_weights[anim],
-			target,
-			blendSpeed * delta
-		)
 
 func update_animation_tree():
 	animTree["parameters/run/blend_amount"] = anim_weights[RUN]
@@ -245,7 +383,6 @@ func update_animation_tree():
 	animTree["parameters/runback/blend_amount"] = anim_weights[RUNBACK]
 	animTree["parameters/jump/blend_amount"] = anim_weights[JUMP]
 	animTree["parameters/sprint/blend_amount"] = anim_weights[SPRINT]
-
 
 
 # CAMERA
@@ -260,10 +397,9 @@ var t_bob := 0.0
 func _unhandled_input(event):
 	if not is_multiplayer_authority():
 		return
-	
+
 	if event is InputEventMouseMotion and trappedMouse:
 		rotate_y(-event.relative.x * SENSITIVITY)
-
 		spine3d.rotate_x(-event.relative.y * SENSITIVITY)
 		spine3d.rotation.x = clamp(
 			spine3d.rotation.x,
@@ -271,115 +407,76 @@ func _unhandled_input(event):
 			deg_to_rad(40)
 		)
 
+
 func playerMovement(delta):
 	if not is_multiplayer_authority():
 		return
-	
-	if Input.is_action_just_pressed("gun1") and currentWeapon != "Pistol" and not reloading and not changing:
-		weaponToChange = "Pistol"
-		animTree.set("parameters/change/request",AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
-		changing = true
-	
-	if Input.is_action_just_pressed("gun2") and currentWeapon != "Shotgun" and not reloading and not changing:
-		weaponToChange = "Shotgun"
-		animTree.set("parameters/change/request",AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
-		changing = true
-		
-	if Input.is_action_just_pressed("gun3") and currentWeapon != "Sniper Rifle" and not reloading and not changing:
-		weaponToChange = "Sniper Rifle"
-		animTree.set("parameters/change/request",AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
-		changing = true
-		
-	if Input.is_action_just_pressed("gun4") and currentWeapon != "Submachine Gun" and not reloading and not changing:
-		weaponToChange = "Submachine Gun"
-		animTree.set("parameters/change/request",AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
-		changing = true
-		
-	if Input.is_action_just_pressed("gun5") and currentWeapon != "Assault Rifle" and not reloading and not changing:
-		weaponToChange = "Assault Rifle"
-		animTree.set("parameters/change/request",AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
-		changing = true
-	
+
+	_try_change_weapon()
+
 	if Input.is_action_just_pressed("reload") and not reloading and not changing:
-		var wpn = weaponsInventory[currentWeapon]
-		if wpn["ammo"] > 0:
-			animTree.set("parameters/reload/request",AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+		if weaponsInventory[currentWeapon]["ammo"] > 0:
 			reloading = true
-			
-		
+			start_reload.rpc()
+
 	if Input.is_action_just_pressed("jump") and is_on_floor():
 		velocity.y = JUMP_VELOCITY
 
-	# Movement
-	var input_dir := Input.get_vector(
-		"left",
-		"right",
-		"up",
-		"down"
-	)
-
-	var direction := (
-		transform.basis *
-		Vector3(input_dir.x, 0, input_dir.y)
-	).normalized()
+	var input_dir := Input.get_vector("left", "right", "up", "down")
+	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 
 	if is_on_floor():
-
 		if direction:
 			velocity.x = direction.x * SPEED
 			velocity.z = direction.z * SPEED
-			
+
 			SPEED = 8
 			if Input.is_action_pressed("left"):
 				curAnim = RUNLEFT
-
 			elif Input.is_action_pressed("right"):
 				curAnim = RUNRIGHT
-
 			elif Input.is_action_pressed("down"):
 				curAnim = RUNBACK
-
 			elif Input.is_action_pressed("up"):
 				curAnim = RUN
 				if Input.is_action_pressed("shift"):
 					curAnim = SPRINT
 					SPEED = 11
 		else:
-			velocity.x = lerp(
-				velocity.x,
-				0.0,
-				delta * 10.0
-			)
-
-			velocity.z = lerp(
-				velocity.z,
-				0.0,
-				delta * 10.0
-			)
+			velocity.x = lerp(velocity.x, 0.0, delta * 10.0)
+			velocity.z = lerp(velocity.z, 0.0, delta * 10.0)
 			curAnim = IDLE
-
 	else:
-		velocity.x = lerp(
-			velocity.x,
-			direction.x * SPEED,
-			delta * 5.5
-		)
-		velocity.z = lerp(
-			velocity.z,
-			direction.z * SPEED,
-			delta * 5.5
-		)
+		velocity.x = lerp(velocity.x, direction.x * SPEED, delta * 5.5)
+		velocity.z = lerp(velocity.z, direction.z * SPEED, delta * 5.5)
 		curAnim = JUMP
+
 	# Shoot
 	if Input.is_action_just_pressed("click") and not reloading:
-		var tween = create_tween()
-		tween.tween_property(camera,"fov",65,0.02)
+		if not looking_aim:
+			var tween = create_tween()
+			tween.tween_property(camera, "fov", 65, 0.02)
 		isShooting = true
 	if Input.is_action_just_released("click"):
-		var tween = create_tween()
-		tween.tween_property(camera,"fov",75,0.02)
+		if not looking_aim:
+			var tween = create_tween()
+			tween.tween_property(camera, "fov", 75, 0.02)
 		isShooting = false
-		
+
+	if Input.is_action_just_pressed("ctrl") and currentWeapon == "Sniper Rifle" and not looking_aim:
+		looking_aim = true
+		var tween = create_tween()
+		tween.set_parallel()
+		tween.tween_property(camera, "fov", 40, 0.02)
+		tween.tween_property(aim_2, "position", Vector2(0, 22.71), 0.04)
+
+	if Input.is_action_just_released("ctrl") and currentWeapon == "Sniper Rifle" and looking_aim:
+		var tween = create_tween()
+		tween.set_parallel()
+		tween.tween_property(camera, "fov", 75, 0.02)
+		tween.tween_property(aim_2, "position", Vector2(0, 1000), 0.04)
+		looking_aim = false
+
 	if Input.is_action_just_pressed("tab"):
 		trappedMouse = not trappedMouse
 		if trappedMouse:
@@ -387,84 +484,47 @@ func playerMovement(delta):
 		else:
 			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 
+
 # READY
 func _ready():
-	# Every player's camera starts OFF.
 	camera.current = false
+	# HUD is a CanvasLayer, so it would draw even for remote players' cameras.
+	hud.visible = is_multiplayer_authority()
 
 	setup_character()
 
-	# Only the player controlled by this peer gets the camera.
 	if not is_multiplayer_authority():
 		return
 
 	camera.current = true
 
-	print(
-		"CAMERA ACTIVE | player = ",
-		name,
-		" | authority = ",
-		get_multiplayer_authority(),
-		" | my_id = ",
-		multiplayer.get_unique_id()
-	)
 
 # PHYSICS
-
-
 func _physics_process(delta):
 	if health <= 0:
 		return
-		
+
+	# Everyone blends animations from the synced curAnim.
 	handle_animations(delta)
 	update_animation_tree()
+
+	# Remote players are moved by the synchronizer only.
+	if not is_multiplayer_authority():
+		return
+
 	shootSystem(delta)
 
-	# Gravity
 	if not is_on_floor():
 		velocity += GRAVITY * delta
-		
+
 	playerMovement(delta)
-	
 	move_and_slide()
 
-	# Head bob
 	t_bob += delta * velocity.length() * float(is_on_floor())
 	camera.position = _headbob(t_bob)
-	
-	
 
 
 func _headbob(time: float) -> Vector3:
 	var pos := Vector3.ZERO
-
 	pos.y = sin(time * BOB_FREQ) * BOB_AMP
-
 	return pos
-
-
-func _on_timer_timeout() -> void:
-	health = 100
-	ragdollSkeleton.physical_bones_stop_simulation()
-	$characters/Armature_001/Skeleton3D/headCollision/headArea.health = health
-	collision_layer = 2
-
-func changeWeapon():
-	currentWeapon = weaponToChange
-	setup_weapon()
-	
-func doneReload():
-	reloading = false
-	var wpn = weaponsInventory[currentWeapon]
-	if wpn["ammo"] > 0 and wpn["magazine"] < wpn["reload"]:
-		var maxAdd = wpn["reload"] - wpn["magazine"]
-		if wpn["ammo"] > wpn["reload"]:
-			weaponsInventory[currentWeapon]['magazine'] += maxAdd
-			weaponsInventory[currentWeapon]['ammo']-= maxAdd
-		else:
-			weaponsInventory[currentWeapon]['magazine'] += wpn["ammo"]
-			weaponsInventory[currentWeapon]['ammo']-=wpn["ammo"]
-	showWeaponInfo()
-	
-func doneChange():
-	changing = false

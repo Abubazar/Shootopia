@@ -8,5 +8,6 @@ func _ready() -> void:
 
 @onready var player: CharacterBody3D = $"../../../../.."
 
+@rpc("any_peer","reliable")
 func gotHit(area,dmg,player_name):
 	player.gotHit("headshot",dmg,player_name)

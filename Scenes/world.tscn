@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://c2w074dogbaxm"]
+[gd_scene load_steps=7 format=3 uid="uid://c2w074dogbaxm"]
 
 [ext_resource type="Script" uid="uid://dkxlyf73y2o4o" path="res://Scripts/world.gd" id="1_5a7ea"]
 [ext_resource type="PackedScene" uid="uid://c6oxhb850h8aq" path="res://Maps/map1.tscn" id="3_fo5ed"]
@@ -15,6 +15,9 @@ background_mode = 2
 sky = SubResource("Sky_f3sb7")
 tonemap_mode = 2
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_go701"]
+size = Vector3(0.001, 0.162369, 0.14679)
+
 [node name="World" type="Node3D"]
 script = ExtResource("1_5a7ea")
 
@@ -23,5 +26,41 @@ environment = SubResource("Environment_fj7yv")
 
 [node name="map1" parent="." instance=ExtResource("3_fo5ed")]
 transform = Transform3D(3.325, 0, 0, 0, 3.325, 0, 0, 0, 3.325, 0, -8.89327, 0)
+
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="map1/room /StaticBody3D2" index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0424175, 0.000495968, 0.0620422)
+shape = SubResource("BoxShape3D_go701")
+
+[node name="CollisionShape3D3" type="CollisionShape3D" parent="map1/room /StaticBody3D2" index="2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0423786, -0.00158686, 0.0620422)
+shape = SubResource("BoxShape3D_go701")
+
+[node name="CollisionShape3D4" type="CollisionShape3D" parent="map1/room /StaticBody3D2" index="3"]
+transform = Transform3D(-9.17822e-08, -1, -1.19209e-07, 1, -9.17822e-08, -1.19209e-07, 1.19209e-07, -1.19209e-07, 1, -2.68449e-05, -0.08084, 0.0620422)
+shape = SubResource("BoxShape3D_go701")
+
+[node name="CollisionShape3D5" type="CollisionShape3D" parent="map1/room /StaticBody3D2" index="4"]
+transform = Transform3D(-9.17822e-08, -1, -1.19209e-07, 1, -9.17822e-08, -1.19209e-07, 1.19209e-07, -1.19209e-07, 1, -2.68449e-05, 0.0819533, 0.0620423)
+shape = SubResource("BoxShape3D_go701")
+
+[node name="spawn_points" type="Node3D" parent="."]
+
+[node name="Marker3D" type="Marker3D" parent="spawn_points"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.00414, 0, -23.6002)
+
+[node name="Marker3D2" type="Marker3D" parent="spawn_points"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.1003, 0, -3.03453)
+
+[node name="Marker3D3" type="Marker3D" parent="spawn_points"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.7786, 0, 22.9597)
+
+[node name="Marker3D4" type="Marker3D" parent="spawn_points"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.3091, 0, 22.9597)
+
+[node name="Marker3D5" type="Marker3D" parent="spawn_points"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.68245, 0, -5.59219)
+
+[node name="Marker3D6" type="Marker3D" parent="spawn_points"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.19885, 0.219928, -1.03845)
 
 [editable path="map1"]

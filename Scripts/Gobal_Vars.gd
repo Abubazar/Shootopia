@@ -3,7 +3,7 @@ extends Node
 var save_path = "user://data.save"
 
 # All variables to save in memory
-var character = 0
+var character: int = 0
 var username = "Player"
 var sound = true
 var sensitivity = 0.016
