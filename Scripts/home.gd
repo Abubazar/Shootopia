@@ -61,7 +61,7 @@ func host():
 	network_manager.create_server()
 	
 func join():
-	network_manager.join_server()
+	network_manager.join_server($"home/lobby/play game/Control/HBoxContainer/LineEdit".text)
 	
 func lobby_selected(index):
 	pass

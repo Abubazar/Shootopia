@@ -4,19 +4,15 @@ extends Node
 
 @onready var canvas_layer: CanvasLayer = $"../CanvasLayer"
 @onready var world: Node3D = $"../World"
-@onready var lobbies: ItemList = $"../CanvasLayer/home/lobby/play game/GridContainer/VBoxContainer2/Control/lobbies"
 @onready var host_players: ItemList = $"../CanvasLayer/home/lobby/current_players/PanelContainer/MarginContainer/VBoxContainer/host_players"
 @onready var current_players: Control = $"../CanvasLayer/home/lobby/current_players"
+@onready var line_edit: LineEdit = $"../CanvasLayer/home/lobby/play game/Control/HBoxContainer/LineEdit"
 
 
 const PLAYER_SCENE = preload("res://Scenes/player.tscn")
 
 const PORT := 7777
-const DISCOVERY_PORT := 7778
 const MAX_PLAYERS := 10          # includes the host
-
-const BROADCAST_INTERVAL := 1.0
-const GAME_TIMEOUT := 3.0
 
 
 var peer := ENetMultiplayerPeer.new()
@@ -30,18 +26,12 @@ var game_started := false
 # peer_id -> username. Owned by the host, mirrored to every client.
 var lobby_players: Dictionary = {}
 
+# Label (created in code) that shows the host's IP in the players screen.
+var ip_label: Label
 
-# ============================================================
-# DISCOVERY
-# ============================================================
-
-var discovery_listener := PacketPeerUDP.new()
-var discovery_broadcaster := PacketPeerUDP.new()
-
-var discovery_broadcasting := false
-var broadcast_timer := 0.0
-
-var discovered_games: Dictionary = {}
+# Text we put in the LineEdit to report problems. Cleared when the user clicks it.
+const MSG_INVALID := "Invalid"
+const MSG_FAILED := "Connection failed"
 
 
 # ============================================================
@@ -57,19 +47,55 @@ func _ready() -> void:
 	multiplayer.connection_failed.connect(_on_connection_failed)
 	multiplayer.server_disconnected.connect(_on_server_disconnected)
 
-	# Double-click (or Enter) on a lobby joins it.
-	lobbies.item_activated.connect(_on_lobby_activated)
+	# Pressing Enter in the IP box tries to join.
+	line_edit.text_submitted.connect(_on_line_edit_submitted)
+	# Clicking the box after an error message clears it.
+	line_edit.focus_entered.connect(_on_line_edit_focus)
+
+	# Label that sits above the player list and shows the host's IP.
+	ip_label = Label.new()
+	ip_label.visible = false
+	var list_parent := host_players.get_parent()
+	list_parent.add_child(ip_label)
+	list_parent.move_child(ip_label, host_players.get_index())
 
 	current_players.hide()
-
-	# Everyone starts listening for games immediately.
-	start_discovery_listener()
 
 
 func _my_name() -> String:
 	if str(Glob.username) == "":
 		return "Player"
 	return str(Glob.username)
+
+
+# ============================================================
+# LOCAL IP
+# ============================================================
+
+# Returns the most likely LAN IPv4 address of this machine.
+func get_local_ip() -> String:
+	var fallback := ""
+
+	for ip in IP.get_local_addresses():
+		var parts := ip.split(".")
+		if parts.size() != 4:
+			continue  # skip IPv6
+		if ip.begins_with("127.") or ip.begins_with("169.254."):
+			continue
+
+		# Prefer typical home-network ranges.
+		if ip.begins_with("192.168."):
+			return ip
+		if ip.begins_with("10."):
+			fallback = ip if fallback == "" else fallback
+		elif ip.begins_with("172."):
+			var second := int(parts[1])
+			if second >= 16 and second <= 31 and fallback == "":
+				fallback = ip
+		elif fallback == "":
+			fallback = ip
+
+	return fallback if fallback != "" else "127.0.0.1"
 
 
 # ============================================================
@@ -97,24 +123,43 @@ func create_server() -> void:
 
 	lobby_players = { 1: _my_name() }
 
-	# Stop showing other lobbies, we're hosting now.
-	discovered_games.clear()
-	update_games([])
-
-	# Show the lobby panel with the player list.
+	# Show the lobby panel with the player list and the IP to share.
+	ip_label.text = "Hosting on IP: %s" % get_local_ip()
+	ip_label.visible = true
 	current_players.show()
 	refresh_lobby_list()
-
-	start_game_broadcast()
 
 	print("Server started! Host ID: ", multiplayer.get_unique_id())
 
 
 # ============================================================
-# JOIN SERVER  (called when you double-click a lobby)
+# JOIN SERVER  (connect your "Join" button to join_from_input)
 # ============================================================
 
-func join_server(ip: String = "127.0.0.1", port: int = PORT) -> void:
+# Reads the IP from the LineEdit, validates it, and connects.
+func join_from_input() -> void:
+	if lobby_active:
+		return
+
+	var ip := line_edit.text.strip_edges()
+
+	if not ip.is_valid_ip_address():
+		line_edit.text = MSG_INVALID
+		return
+
+	join_server(ip)
+
+
+func _on_line_edit_submitted(_text: String) -> void:
+	join_from_input()
+
+
+func _on_line_edit_focus() -> void:
+	if line_edit.text == MSG_INVALID or line_edit.text == MSG_FAILED:
+		line_edit.text = ""
+
+
+func join_server(ip: String, port: int = PORT) -> void:
 	if lobby_active:
 		return
 
@@ -125,6 +170,7 @@ func join_server(ip: String = "127.0.0.1", port: int = PORT) -> void:
 
 	if error != OK:
 		print("Failed to connect: ", error)
+		line_edit.text = MSG_INVALID
 		return
 
 	multiplayer.multiplayer_peer = peer
@@ -132,19 +178,6 @@ func join_server(ip: String = "127.0.0.1", port: int = PORT) -> void:
 	lobby_active = true
 	is_hosting = false
 	game_started = false
-
-
-# Optional: connect a "Join" button to this to join the selected lobby.
-func join_selected_lobby() -> void:
-	var selected := lobbies.get_selected_items()
-	if selected.is_empty():
-		return
-	_on_lobby_activated(selected[0])
-
-
-func _on_lobby_activated(index: int) -> void:
-	var game: Dictionary = lobbies.get_item_metadata(index)
-	join_server(str(game["ip"]), int(game["port"]))
 
 
 # ============================================================
@@ -156,7 +189,6 @@ func start_game() -> void:
 		return
 
 	game_started = true
-	stop_game_broadcast()
 
 	# Everyone (host included) switches to the world and spawns all players.
 	start_match.rpc(lobby_players.keys())
@@ -184,7 +216,6 @@ func start_match(ids: Array) -> void:
 
 func cancel_lobby() -> void:
 	_return_to_menu()
-	lobby_active = false
 
 
 # ============================================================
@@ -267,9 +298,7 @@ func _on_peer_disconnected(peer_id: int) -> void:
 func _on_connected() -> void:
 	print("Successfully connected! My peer ID: ", multiplayer.get_unique_id())
 
-	discovered_games.clear()
-	update_games([])
-
+	ip_label.visible = false
 	current_players.show()
 
 	register_player.rpc_id(1, _my_name())
@@ -278,6 +307,7 @@ func _on_connected() -> void:
 func _on_connection_failed() -> void:
 	print("Failed to connect to server!")
 	_return_to_menu()
+	line_edit.text = MSG_FAILED
 
 
 # Fires on a CLIENT when the host closes the lobby / drops.
@@ -295,16 +325,13 @@ func _return_to_menu() -> void:
 	is_hosting = false
 	game_started = false
 
-	stop_game_broadcast()
-
 	peer.close()
 	multiplayer.multiplayer_peer = null
 	peer = ENetMultiplayerPeer.new()
 
 	lobby_players.clear()
-	discovered_games.clear()
-	update_games([])
 	host_players.clear()
+	ip_label.visible = false
 
 	for child in world.get_children():
 		if child.name.begins_with("Player_"):
@@ -358,191 +385,3 @@ func remove_player(peer_id: int) -> void:
 
 	world.get_node(player_name).queue_free()
 	print("Removed player: ", peer_id)
-
-
-# ============================================================
-# START DISCOVERY LISTENER
-# ============================================================
-
-func start_discovery_listener() -> void:
-	var error := discovery_listener.bind(DISCOVERY_PORT)
-
-	if error != OK:
-		print("Failed to start discovery listener: ", error)
-		return
-
-	print("LAN discovery listening on port ", DISCOVERY_PORT)
-
-
-# ============================================================
-# START / STOP GAME BROADCASTING
-# ============================================================
-
-func start_game_broadcast() -> void:
-	if discovery_broadcasting:
-		return
-
-	discovery_broadcaster.set_broadcast_enabled(true)
-
-	var error := discovery_broadcaster.set_dest_address(
-		"255.255.255.255",
-		DISCOVERY_PORT
-	)
-
-	if error != OK:
-		print("Failed to configure discovery broadcast: ", error)
-		return
-
-	discovery_broadcasting = true
-	broadcast_timer = 0.0
-
-	print("LAN game broadcasting started.")
-
-	send_game_broadcast()
-
-
-func stop_game_broadcast() -> void:
-	if not discovery_broadcasting:
-		return
-
-	discovery_broadcasting = false
-	discovery_broadcaster.close()
-
-
-func send_game_broadcast() -> void:
-	if not is_hosting or game_started:
-		return
-
-	var game_info := {
-		"type": "LAN_GAME",
-		"username": _my_name(),
-		"players": lobby_players.size(),
-		"max_players": MAX_PLAYERS,
-		"port": PORT
-	}
-
-	discovery_broadcaster.put_packet(
-		JSON.stringify(game_info).to_utf8_buffer()
-	)
-
-
-# ============================================================
-# PROCESS DISCOVERY
-# ============================================================
-
-func process_discovery() -> void:
-	while discovery_listener.get_available_packet_count() > 0:
-
-		var packet := discovery_listener.get_packet()
-		var sender_ip := discovery_listener.get_packet_ip()
-
-		# Always drain packets, but ignore them while we're hosting
-		# or already inside a lobby.
-		if lobby_active:
-			continue
-
-		# Dual-stack sockets can report IPv4 as "::ffff:192.168.x.x".
-		if sender_ip.begins_with("::ffff:"):
-			sender_ip = sender_ip.substr(7)
-
-		var data = JSON.parse_string(packet.get_string_from_utf8())
-
-		if not data is Dictionary:
-			continue
-
-		if data.get("type", "") != "LAN_GAME":
-			continue
-
-		var game := {
-			"ip": sender_ip,
-			"username": str(data.get("username", "Unknown")),
-			"players": int(data.get("players", 0)),
-			"max_players": int(data.get("max_players", MAX_PLAYERS)),
-			"port": int(data.get("port", PORT)),
-			"last_seen": Time.get_ticks_msec()
-		}
-
-		# Refresh the list if it's new OR if its info changed (player count etc.)
-		var old = discovered_games.get(sender_ip)
-		var changed: bool = (
-			old == null
-			or old["username"] != game["username"]
-			or old["players"] != game["players"]
-			or old["max_players"] != game["max_players"]
-			or old["port"] != game["port"]
-		)
-
-		discovered_games[sender_ip] = game
-
-		if changed:
-			print("LAN GAME UPDATED | ", sender_ip, " | ", game["username"])
-			notify_games_changed()
-
-
-# ============================================================
-# REMOVE OLD GAMES
-# ============================================================
-
-func remove_old_games() -> void:
-	var current_time := Time.get_ticks_msec()
-	var changed := false
-
-	for ip in discovered_games.keys():
-		var game: Dictionary = discovered_games[ip]
-		var age := current_time - int(game["last_seen"])
-
-		if age > GAME_TIMEOUT * 1000.0:
-			print("LAN GAME TIMED OUT: ", ip)
-			discovered_games.erase(ip)
-			changed = true
-
-	if changed:
-		notify_games_changed()
-
-
-# ============================================================
-# GAME LIST -> UI
-# ============================================================
-
-func notify_games_changed() -> void:
-	update_games(discovered_games.values())
-
-
-func update_games(list: Array) -> void:
-	# Remember the selected lobby so a refresh doesn't deselect it.
-	var selected_ip := ""
-	var selected := lobbies.get_selected_items()
-	if not selected.is_empty():
-		var meta = lobbies.get_item_metadata(selected[0])
-		if meta is Dictionary:
-			selected_ip = str(meta["ip"])
-
-	lobbies.clear()
-
-	for game in list:
-		var text := "%s    %d/%d" % [
-			game["username"],
-			game["players"],
-			game["max_players"]
-		]
-		var index: int = lobbies.add_item(text)
-		lobbies.set_item_metadata(index, game)
-
-		if str(game["ip"]) == selected_ip:
-			lobbies.select(index)
-
-
-# ============================================================
-# MAIN PROCESS
-# ============================================================
-
-func _process(delta: float) -> void:
-	process_discovery()
-	remove_old_games()
-
-	if discovery_broadcasting:
-		broadcast_timer += delta
-
-		if broadcast_timer >= BROADCAST_INTERVAL:
-			broadcast_timer = 0.0
-			send_game_broadcast()
