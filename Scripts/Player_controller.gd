@@ -5,6 +5,7 @@ extends CharacterBody3D
 var SPEED := 8.0
 const JUMP_VELOCITY := 8.5
 const GRAVITY := Vector3(0, -20, 0)
+var menu = false
 
 @onready var head = $spine/head
 @onready var camera = $spine/head/Camera3D
@@ -12,6 +13,7 @@ const GRAVITY := Vector3(0, -20, 0)
 @onready var rayCast = $spine/RayCast3D
 @onready var hud = $spine/head/Camera3D/CanvasLayer
 @onready var weapon_map = $spine/head/Camera3D/CanvasLayer/Control/PanelContainer/MarginContainer/weaponMap
+@onready var pain_rect: TextureRect = $spine/head/Camera3D/CanvasLayer/TextureRect
 
 @onready var particle = preload("res://Scenes/particle.tscn")
 
@@ -79,6 +81,8 @@ func setup_character():
 	_apply_character()
 	spine_ik.start()
 	setup_weapon()
+	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	trappedMouse = true
 
 
 # WEAPONS
@@ -197,9 +201,18 @@ func start_reload():
 	animTree.set("parameters/reload/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 
 
-# Called from the animation (runs on every peer). The setter updates visuals.
+# Called from the animation track on every peer, but only the owner acts on it.
+# The owner then tells everyone the new weapon, so remote peers don't depend on
+# their own animation callbacks firing.
 func changeWeapon():
-	currentWeapon = weaponToChange
+	if not is_multiplayer_authority():
+		return
+	set_weapon.rpc(weaponToChange)
+
+
+@rpc("authority", "call_local", "reliable")
+func set_weapon(weapon: String):
+	currentWeapon = weapon
 
 
 func doneChange():
@@ -290,6 +303,9 @@ func receive_hit(area: String, dmg: int, shooter_name: String):
 	if not is_multiplayer_authority() or health <= 0:
 		return
 	var total = dmg * 2 if area == "headshot" else dmg
+	pain_rect.modulate = Color(1.0, 1.0, 1.0, 1.0)
+	var tween = create_tween()
+	tween.tween_property(pain_rect,"modulate",Color(1.0, 1.0, 1.0, 0.0),0.2)
 	apply_health.rpc(health - total)
 
 
@@ -328,6 +344,7 @@ func respawn(pos: Vector3):
 	health = 100
 	_update_head_health()
 	waitingRespawn = false
+	$Timer.stop()
 
 	if is_multiplayer_authority():
 		for w in weaponsInventory.values():
@@ -397,7 +414,8 @@ var t_bob := 0.0
 func _unhandled_input(event):
 	if not is_multiplayer_authority():
 		return
-
+	if menu: return
+	
 	if event is InputEventMouseMotion and trappedMouse:
 		rotate_y(-event.relative.x * SENSITIVITY)
 		spine3d.rotate_x(-event.relative.y * SENSITIVITY)
@@ -411,7 +429,8 @@ func _unhandled_input(event):
 func playerMovement(delta):
 	if not is_multiplayer_authority():
 		return
-
+	
+	if menu: return
 	_try_change_weapon()
 
 	if Input.is_action_just_pressed("reload") and not reloading and not changing:
@@ -483,6 +502,12 @@ func playerMovement(delta):
 			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 		else:
 			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+			
+			
+	if Input.is_action_just_pressed("esc"):
+		$spine/head/Camera3D/CanvasLayer/pause_menu.show()
+		menu = true
+		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 
 
 # READY
@@ -493,10 +518,33 @@ func _ready():
 
 	setup_character()
 
+	# Skin/weapon sync. Node creation order differs between peers, so we do both:
+	# the owner pushes its state, and remote copies ask the owner for it.
+	if multiplayer.has_multiplayer_peer():
+		if is_multiplayer_authority():
+			set_state.rpc(character_type, currentWeapon)
+		else:
+			request_state.rpc_id(get_multiplayer_authority())
+
 	if not is_multiplayer_authority():
 		return
 
 	camera.current = true
+	playerLabel.text = Glob.username
+	SENSITIVITY = Glob.sensitivity
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func request_state():
+	if not is_multiplayer_authority():
+		return
+	set_state.rpc_id(multiplayer.get_remote_sender_id(), character_type, currentWeapon)
+
+
+@rpc("authority", "call_remote", "reliable")
+func set_state(char_type: int, weapon: String):
+	character_type = char_type
+	currentWeapon = weapon
 
 
 # PHYSICS
@@ -528,3 +576,14 @@ func _headbob(time: float) -> Vector3:
 	var pos := Vector3.ZERO
 	pos.y = sin(time * BOB_FREQ) * BOB_AMP
 	return pos
+
+
+func _on_continue_pressed() -> void:
+	$spine/head/Camera3D/CanvasLayer/pause_menu.hide()
+	menu = false
+	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+
+
+
+func _on_exit_pressed() -> void:
+	if is_multiplayer_authority(): get_tree().quit()

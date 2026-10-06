@@ -6051,7 +6051,6 @@ theme = ExtResource("3_llnbm")
 text = "Exit Game"
 
 [node name="lobby" type="Control" parent="CanvasLayer/home"]
-visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -6134,6 +6133,65 @@ theme = ExtResource("3_llnbm")
 theme_override_font_sizes/font_size = 25
 text = "Go Back"
 
+[node name="current_players" type="Control" parent="CanvasLayer/home/lobby"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="CanvasLayer/home/lobby/current_players"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -359.0
+offset_top = -227.0
+offset_right = 359.0
+offset_bottom = 227.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/home/lobby/current_players/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/home/lobby/current_players/PanelContainer/MarginContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CanvasLayer/home/lobby/current_players/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme = ExtResource("3_llnbm")
+text = "You are hosting a game"
+
+[node name="host_players" type="ItemList" parent="CanvasLayer/home/lobby/current_players/PanelContainer/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 350)
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/home/lobby/current_players/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="cancel_game" type="Button" parent="CanvasLayer/home/lobby/current_players/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme = ExtResource("3_llnbm")
+theme_override_font_sizes/font_size = 30
+text = "Cancel"
+
+[node name="start_game" type="Button" parent="CanvasLayer/home/lobby/current_players/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme = ExtResource("3_llnbm")
+theme_override_font_sizes/font_size = 30
+text = "Start game"
+
 [node name="settings" type="MarginContainer" parent="CanvasLayer/home"]
 visible = false
 layout_mode = 1
@@ -6187,20 +6245,6 @@ theme = ExtResource("3_llnbm")
 min_value = 0.01
 max_value = 0.1
 value = 0.01
-
-[node name="HBoxContainer3" type="HBoxContainer" parent="CanvasLayer/home/settings/ScrollContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_constants/separation = 25
-
-[node name="Label" type="Label" parent="CanvasLayer/home/settings/ScrollContainer/VBoxContainer/HBoxContainer3"]
-custom_minimum_size = Vector2(100, 0)
-layout_mode = 2
-theme = ExtResource("3_llnbm")
-text = "Sound Effects"
-
-[node name="sound" type="CheckButton" parent="CanvasLayer/home/settings/ScrollContainer/VBoxContainer/HBoxContainer3"]
-layout_mode = 2
-theme = ExtResource("3_llnbm")
 
 [node name="go back" type="Button" parent="CanvasLayer/home/settings/ScrollContainer/VBoxContainer"]
 layout_mode = 2
@@ -7054,6 +7098,10 @@ text = " Confirm "
 
 [node name="World" parent="." instance=ExtResource("7_nw1ns")]
 
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="World"]
+transform = Transform3D(0.956945, 0.0193181, -0.289624, 0.290268, -0.0636872, 0.954824, 0, -0.997783, -0.0665526, 0, 5.7979, 0)
+light_cull_mask = 4293918722
+
 [connection signal="pressed" from="CanvasLayer/home/main/VBoxContainer/play btn" to="CanvasLayer" method="_on_play_btn_pressed"]
 [connection signal="pressed" from="CanvasLayer/home/main/VBoxContainer/select btn" to="CanvasLayer" method="_on_select_btn_pressed"]
 [connection signal="pressed" from="CanvasLayer/home/main/VBoxContainer/settings btn" to="CanvasLayer" method="_on_settings_btn_pressed"]
@@ -7062,6 +7110,8 @@ text = " Confirm "
 [connection signal="pressed" from="CanvasLayer/home/lobby/play game/GridContainer/VBoxContainer2/Control/HBoxContainer/join btn" to="CanvasLayer" method="_on_join_btn_pressed"]
 [connection signal="item_selected" from="CanvasLayer/home/lobby/play game/GridContainer/VBoxContainer2/Control/lobbies" to="CanvasLayer" method="_on_lobbies_item_selected"]
 [connection signal="pressed" from="CanvasLayer/home/lobby/back btn" to="CanvasLayer" method="_on_back_btn_pressed"]
+[connection signal="pressed" from="CanvasLayer/home/lobby/current_players/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/cancel_game" to="CanvasLayer" method="_on_cancel_game_pressed"]
+[connection signal="pressed" from="CanvasLayer/home/lobby/current_players/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/start_game" to="CanvasLayer" method="_on_start_game_pressed"]
 [connection signal="pressed" from="CanvasLayer/home/settings/ScrollContainer/VBoxContainer/go back" to="CanvasLayer" method="_on_go_back_pressed"]
 [connection signal="pressed" from="CanvasLayer/home/select character/CenterContainer/prev btn" to="CanvasLayer" method="_on_prev_btn_pressed"]
 [connection signal="pressed" from="CanvasLayer/home/select character/CenterContainer2/next btn" to="CanvasLayer" method="_on_next_btn_pressed"]

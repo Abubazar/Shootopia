@@ -9,6 +9,8 @@ extends CanvasLayer
 @onready var world: Node3D = $"../World"
 @onready var network_manager: Network_manager = $"../Network_manager"
 @onready var scene3d = $"home/select character/CenterContainer3/SubViewportContainer/SubViewport/Node3D/"
+@onready var usernameText: LineEdit = $home/settings/ScrollContainer/VBoxContainer/HBoxContainer/username
+@onready var sensitivityVal: HSlider = $home/settings/ScrollContainer/VBoxContainer/HBoxContainer2/sensitivity
 
 var charIdx = 0
 var charNames = [
@@ -29,6 +31,9 @@ func _ready() -> void:
 	setCharacter(charNames[charIdx])
 	world.visible = false
 	scene3d.visible = false
+	
+	usernameText.text = Glob.username
+	sensitivityVal.value = Glob.sensitivity
 
 
 func setCharacter(cNam):
@@ -62,6 +67,9 @@ func lobby_selected(index):
 	pass
 
 func go_back():
+	Glob.username = usernameText.text
+	Glob.sensitivity = sensitivityVal.value
+	
 	lobbyScreen.visible = false
 	settingsScreen.visible = false
 	mainScreen.visible = true
@@ -132,3 +140,13 @@ func _on_go_back_pressed() -> void:
 
 func _on_select_btn_pressed() -> void:
 	select()
+
+
+
+
+func _on_cancel_game_pressed() -> void:
+	network_manager.cancel_lobby()
+
+
+func _on_start_game_pressed() -> void:
+	network_manager.start_game()
