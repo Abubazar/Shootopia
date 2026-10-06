@@ -6013,7 +6013,6 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="main" type="CenterContainer" parent="CanvasLayer/home"]
-visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -6050,7 +6049,13 @@ layout_mode = 2
 theme = ExtResource("3_llnbm")
 text = "Exit Game"
 
+[node name="info btn" type="Button" parent="CanvasLayer/home/main/VBoxContainer"]
+layout_mode = 2
+theme = ExtResource("3_llnbm")
+text = "Game Info"
+
 [node name="lobby" type="Control" parent="CanvasLayer/home"]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -6088,23 +6093,23 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 20
 
-[node name="join btn" type="Button" parent="CanvasLayer/home/lobby/play game/Control/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 4
-theme = ExtResource("3_llnbm")
-theme_override_font_sizes/font_size = 25
-text = "Join this game"
-
-[node name="LineEdit" type="LineEdit" parent="CanvasLayer/home/lobby/play game/Control/HBoxContainer"]
-layout_mode = 2
-placeholder_text = "IP Address for joining"
-
 [node name="host btn" type="Button" parent="CanvasLayer/home/lobby/play game/Control/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
 theme = ExtResource("3_llnbm")
 theme_override_font_sizes/font_size = 25
 text = "Host a game"
+
+[node name="LineEdit" type="LineEdit" parent="CanvasLayer/home/lobby/play game/Control/HBoxContainer"]
+layout_mode = 2
+placeholder_text = "IP Address for joining"
+
+[node name="join btn" type="Button" parent="CanvasLayer/home/lobby/play game/Control/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme = ExtResource("3_llnbm")
+theme_override_font_sizes/font_size = 25
+text = "Join this game"
 
 [node name="back btn" type="Button" parent="CanvasLayer/home/lobby"]
 layout_mode = 1
@@ -7093,6 +7098,67 @@ grow_vertical = 0
 theme = ExtResource("3_llnbm")
 text = " Confirm "
 
+[node name="info_pannel" type="Control" parent="CanvasLayer/home"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="CanvasLayer/home/info_pannel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -225.5
+offset_top = -155.5
+offset_right = 225.5
+offset_bottom = 155.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/home/info_pannel/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 60
+
+[node name="RichTextLabel" type="RichTextLabel" parent="CanvasLayer/home/info_pannel/PanelContainer/MarginContainer"]
+layout_mode = 2
+theme_override_fonts/normal_font = ExtResource("2_12ycv")
+theme_override_font_sizes/normal_font_size = 20
+text = "This is a simple indie FPS project i made with 3d assets from quaternius.com
+MAke sure to check him out, he has cool free assets for a variety of projects. All animations were gotten from Mixamo.com as well. This is my first time making a fps and multiplayer game like this and I'm not too good on godot so there are some bugs. but enjoy!
+
+CONTROLS:
+WASD or Arrow keys for movement
+left click for shooting
+numbers 1 to 5 for switching guns
+R for reload
+SHIFT+W for sprinting
+CTRL for scope i using sniper riflr (Gun 3)"
+
+[node name="Button" type="Button" parent="CanvasLayer/home/info_pannel"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -42.5
+offset_top = -210.0
+offset_right = 42.5
+offset_bottom = -161.0
+grow_horizontal = 2
+grow_vertical = 0
+theme = ExtResource("3_llnbm")
+text = "Okay!"
+
 [node name="World" parent="." instance=ExtResource("7_nw1ns")]
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="World"]
@@ -7103,8 +7169,9 @@ light_cull_mask = 4293918722
 [connection signal="pressed" from="CanvasLayer/home/main/VBoxContainer/select btn" to="CanvasLayer" method="_on_select_btn_pressed"]
 [connection signal="pressed" from="CanvasLayer/home/main/VBoxContainer/settings btn" to="CanvasLayer" method="_on_settings_btn_pressed"]
 [connection signal="pressed" from="CanvasLayer/home/main/VBoxContainer/exit btn" to="CanvasLayer" method="_on_exit_btn_pressed"]
-[connection signal="pressed" from="CanvasLayer/home/lobby/play game/Control/HBoxContainer/join btn" to="CanvasLayer" method="_on_join_btn_pressed"]
+[connection signal="pressed" from="CanvasLayer/home/main/VBoxContainer/info btn" to="CanvasLayer" method="_on_info_btn_pressed"]
 [connection signal="pressed" from="CanvasLayer/home/lobby/play game/Control/HBoxContainer/host btn" to="CanvasLayer" method="_on_host_btn_pressed"]
+[connection signal="pressed" from="CanvasLayer/home/lobby/play game/Control/HBoxContainer/join btn" to="CanvasLayer" method="_on_join_btn_pressed"]
 [connection signal="pressed" from="CanvasLayer/home/lobby/back btn" to="CanvasLayer" method="_on_back_btn_pressed"]
 [connection signal="pressed" from="CanvasLayer/home/lobby/current_players/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/cancel_game" to="CanvasLayer" method="_on_cancel_game_pressed"]
 [connection signal="pressed" from="CanvasLayer/home/lobby/current_players/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/start_game" to="CanvasLayer" method="_on_start_game_pressed"]
@@ -7112,6 +7179,7 @@ light_cull_mask = 4293918722
 [connection signal="pressed" from="CanvasLayer/home/select character/CenterContainer/prev btn" to="CanvasLayer" method="_on_prev_btn_pressed"]
 [connection signal="pressed" from="CanvasLayer/home/select character/CenterContainer2/next btn" to="CanvasLayer" method="_on_next_btn_pressed"]
 [connection signal="pressed" from="CanvasLayer/home/select character/confirm" to="CanvasLayer" method="_on_confirm_pressed"]
+[connection signal="pressed" from="CanvasLayer/home/info_pannel/Button" to="CanvasLayer" method="_on_button_pressed"]
 
 [editable path="World"]
 [editable path="World/map1"]

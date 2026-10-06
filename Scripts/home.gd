@@ -11,6 +11,7 @@ extends CanvasLayer
 @onready var scene3d = $"home/select character/CenterContainer3/SubViewportContainer/SubViewport/Node3D/"
 @onready var usernameText: LineEdit = $home/settings/ScrollContainer/VBoxContainer/HBoxContainer/username
 @onready var sensitivityVal: HSlider = $home/settings/ScrollContainer/VBoxContainer/HBoxContainer2/sensitivity
+@onready var info_pannel: Control = $home/info_pannel
 
 var charIdx = 0
 var charNames = [
@@ -150,3 +151,11 @@ func _on_cancel_game_pressed() -> void:
 
 func _on_start_game_pressed() -> void:
 	network_manager.start_game()
+
+
+func _on_button_pressed() -> void:
+	info_pannel.hide()
+
+
+func _on_info_btn_pressed() -> void:
+	info_pannel.show()
